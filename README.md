@@ -332,13 +332,15 @@ H / L + R [ T / V ]: bg #fda; 70;/F
 
 # 语法 v0.2
 
-![TODO](./img/TODO.svg) 
+![TODO](./img/todo.svg) 
 
 添加图片语法和主体内文本语法。
 
 # 语法 v0.3
 
-![TODO](./img/TODO.svg) 添加条件显示语法。
+![TODO](./img/todo.svg)
+
+添加条件显示语法。
 
 # 使用
 
@@ -369,7 +371,7 @@ _要注意的是，用户可以使用 路明 写出复杂的界面结构，但�
 
 ## Markdown 集成
 
-![](./img/todo.svg)
+![TODO](./img/todo.svg)
 
 <pre>
 &grave;&grave;&grave;luming<br>
