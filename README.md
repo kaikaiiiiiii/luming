@@ -1,13 +1,6 @@
 #  路明（Luming）
 
-<style>
-  .LName {
-    color: rgb(255, 180, 100);
-    font-weight: bold;
-  }
-</style>
-
-**<span class="LName">路明（Luming）</span>** 是一个面向前端页面布局设计的领域专用语言和配套实现工具。它的核心目标不是替代专业设计软件，而是提供一种 **简化、可读的界面结构表达语言**。
+<span style='color: #ffb464; font-weight: bold;'>路明（Luming）</span> 是一个面向前端页面布局设计的领域专用语言和配套实现工具。它的核心目标不是替代专业设计软件，而是提供一种 **简化、可读的界面结构表达语言**。
 
 ## Why Luming?
 
@@ -109,7 +102,7 @@ export default {
 
 # 语法 v0.1
 
-<span class="LName">路明</span> 的语法设计旨在简洁、直观，能够快速表达界面结构和布局关系。以下是 v0.1 版本的基本语法规则：
+<span style='color: #ffb464; font-weight: bold;'>路明</span> 的语法设计旨在简洁、直观，能够快速表达界面结构和布局关系。以下是 v0.1 版本的基本语法规则：
 
 ## 主体名称
 
@@ -332,7 +325,7 @@ H / L + R [ T / V ]: bg #fda; 70;/F
 
 # 使用
 
-<span class="LName">路明</span> 提供了命令行工具来将自身的文本描述编译为可视化预览或结构化的前端代码组件。为了满足不同场景，路明 提供了预览模式和生成模式两种调用方法:
+<span style='color: #ffb464; font-weight: bold;'>路明</span> 提供了命令行工具来将自身的文本描述编译为可视化预览或结构化的前端代码组件。为了满足不同场景，路明 提供了预览模式和生成模式两种调用方法:
 
 ## 预览模式：
 
@@ -370,4 +363,4 @@ Header / Sidebar + Main [ Tabs / Content [Form / Preview]] / Footer<br>
 
 # 关于
 
- 路明 （Luming）的名字本身带有隐喻：英文 Luming 来源于 Luminous（发光），中文 <span class="LName">路明</span> 则象征光亮的路径和清晰的线路，愿光明照亮前行的道路。路明 以文本勾勒界面结构的轮廓，为设计者提供一种“可视化的思维线路”。它不是精细美学的替代品，而是辅助工具——让创意、结构和代码之间的桥梁更加轻量、高效且易于理解。
+ <span style='color: #ffb464; font-weight: bold;'>路明（Luming）</span> 的名字本身带有隐喻：英文 Luming 可以理解为 Luminous（发光），中文 <span style='color: #ffb464; font-weight: bold;'>路明</span> 则象征光亮的路径和清晰的线路，愿光明照亮前行的道路。路明 以文本勾勒界面结构的轮廓，为设计者提供一种“可视化的思维线路”。它不是精细美学的替代品，而是辅助工具——让创意、结构和代码之间的桥梁更加轻量、高效且易于理解。
