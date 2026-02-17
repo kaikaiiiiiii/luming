@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xl="http://www.w3.org/1999/xlink" version="1.1" xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns="http://www.w3.org/2000/svg" viewBox="1455.3234 454.05355 98 99.11011" width="98" height="99.11011">
+    <defs>
+        <filter id="Shadow" filterUnits="userSpaceOnUse" x="1445.5234" y="444.14254">
+            <feGaussianBlur in="SourceAlpha" result="blur" stdDeviation="3.488" />
+            <feFlood flood-color="#45c3ce" flood-opacity=".5" result="flood" />
+            <feComposite in="flood" in2="blur" operator="in" />
+        </filter>
+        <filter id="Shadow_2" filterUnits="userSpaceOnUse" x="1445.5234" y="444.14254">
+            <feGaussianBlur in="SourceAlpha" result="blur" stdDeviation="3.488" />
+            <feFlood flood-color="#ffca65" flood-opacity=".5" result="flood" />
+            <feComposite in="flood" in2="blur" operator="in" />
+        </filter>
+        <filter id="Shadow_3" filterUnits="userSpaceOnUse" x="1445.5234" y="444.14254">
+            <feGaussianBlur in="SourceAlpha" result="blur" stdDeviation="3.488" />
+            <feFlood flood-color="#008f00" flood-opacity=".5" result="flood" />
+            <feComposite in="flood" in2="blur" operator="in" />
+        </filter>
+    </defs>
+    <metadata> Produced by OmniGraffle 7.25\n2026-02-17 06:20:47 +0000</metadata>
+    <g id="Canvas_1" stroke-dasharray="none" stroke="none" fill="none" fill-opacity="1" stroke-opacity="1">
+        <title>Canvas 1</title>
+        <g id="Canvas_1_Layer_1">
+            <title>Layer 1</title>
+            <g id="Graphic_294_shadow" filter="url(#Shadow)">
+                <rect x="1463.99" y="463.05355" width="36" height="36" fill="#b9f9ff" />
+                <rect x="1463.99" y="463.05355" width="36" height="36" stroke="#45c3ce" stroke-linecap="round"
+                    stroke-linejoin="round" stroke-width="1" />
+            </g>
+            <g id="Graphic_293_shadow" filter="url(#Shadow_2)">
+                <rect x="1508.3234" y="463.05355" width="36" height="36" fill="#fffdc6" />
+                <rect x="1508.3234" y="463.05355" width="36" height="36" stroke="#ffca65" stroke-linecap="round"
+                    stroke-linejoin="round" stroke-width="2" />
+            </g>
+            <g id="Graphic_296_shadow" filter="url(#Shadow_3)">
+                <rect x="1464.3234" y="508.16366" width="80" height="36" fill="#80ff80" />
+                <rect x="1464.3234" y="508.16366" width="80" height="36" stroke="#00e500" stroke-linecap="round"
+                    stroke-linejoin="round" stroke-width="2" />
+            </g>
+            <g id="Graphic_294">
+                <rect x="1463.99" y="463.05355" width="36" height="36" fill="#b9f9ff" />
+                <rect x="1463.99" y="463.05355" width="36" height="36" stroke="#45c3ce" stroke-linecap="round"
+                    stroke-linejoin="round" stroke-width="1" />
+            </g>
+            <g id="Graphic_293">
+                <rect x="1508.3234" y="463.05355" width="36" height="36" fill="#fffdc6" />
+                <rect x="1508.3234" y="463.05355" width="36" height="36" stroke="#ffca65" stroke-linecap="round"
+                    stroke-linejoin="round" stroke-width="2" />
+            </g>
+            <g id="Graphic_296">
+                <rect x="1464.3234" y="508.16366" width="80" height="36" fill="#80ff80" />
+                <rect x="1464.3234" y="508.16366" width="80" height="36" stroke="#00e500" stroke-linecap="round"
+                    stroke-linejoin="round" stroke-width="2" />
+            </g>
+        </g>
+    </g>
+</svg>

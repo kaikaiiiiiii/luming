@@ -36,7 +36,7 @@
             </feMerge>
         </filter>
     </defs>
-    <metadata> Produced by OmniGraffle 7.25\n2026-02-17 05:17:46 +0000</metadata>
+    <metadata> Produced by OmniGraffle 7.25\n2026-02-17 14:47:53 +0000</metadata>
     <g id="Canvas_1" stroke-dasharray="none" stroke="none" fill="none" fill-opacity="1" stroke-opacity="1">
         <title>Canvas 1</title>
         <g id="Canvas_1_Layer_1">
@@ -150,9 +150,12 @@
                 </text>
             </g>
             <g id="Graphic_45" filter="url(#Shadow_4)">
-                <rect x="573" y="260.97182" width="382" height="138.19484" fill="white" />
-                <rect x="573" y="260.97182" width="382" height="138.19484" stroke="#0096ff" stroke-linecap="round"
-                    stroke-linejoin="round" stroke-width="1" />
+                <path
+                    d="M 583 260.97182 L 945 260.97182 C 950.5228 260.97182 955 265.44898 955 270.97182 L 955 389.16667 C 955 394.6895 950.5228 399.16667 945 399.16667 L 583 399.16667 C 577.47715 399.16667 573 394.6895 573 389.16667 L 573 270.97182 C 573 265.44898 577.47715 260.97182 583 260.97182 Z"
+                    fill="white" />
+                <path
+                    d="M 583 260.97182 L 945 260.97182 C 950.5228 260.97182 955 265.44898 955 270.97182 L 955 389.16667 C 955 394.6895 950.5228 399.16667 945 399.16667 L 583 399.16667 C 577.47715 399.16667 573 394.6895 573 389.16667 L 573 270.97182 C 573 265.44898 577.47715 260.97182 583 260.97182 Z"
+                    stroke="#0096ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" />
                 <text transform="translate(578 320.84525)" fill="black">
                     <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="150.616" y="15"
                         xml:space="preserve">&lt; Form /&gt;</tspan>
