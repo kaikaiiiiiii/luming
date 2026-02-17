@@ -154,7 +154,7 @@ List [Item Item Item]
 
 <img src='./img/A+B.svg' height="40" style="vertical-align: bottom;" > `A + B` 表示 A 和 B 在同一层级，A 在左，B 在右。
 
-<img src='./img/C[AdB].svg' height="40" style="vertical-align: bottom;" > `C [ A / B ]` 表示 C 是 A、B 的容器。
+<img src='./img/CbAdBb.svg' height="40" style="vertical-align: bottom;" > `C [ A / B ]` 表示 C 是 A、B 的容器。
 
 **`()`** 表示在同层内，强制优先级处理。例如：`A + (B / C)` 表示 A 在左，B 和 C 在 A 的右边的同一层级，B 在上，C 在下。而 `A + B / C` 则表示 A 和 B 在同一层级，A 在上，B 在下，而 C 在 B 的下方。
 
