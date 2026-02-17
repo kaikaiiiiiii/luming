@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xl="http://www.w3.org/1999/xlink" version="1.1" xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns="http://www.w3.org/2000/svg" viewBox="347 81.04085 648 652.95915" width="648" height="652.95915">
+    <defs>
+        <filter id="Shadow" filterUnits="userSpaceOnUse" x="282.2" y="15.744938">
+            <feGaussianBlur in="SourceAlpha" result="blur" stdDeviation=".436" />
+            <feOffset in="blur" result="offset" dx="2" dy="2" />
+            <feFlood flood-color="#0096ff" flood-opacity=".5" result="flood" />
+            <feComposite in="flood" in2="offset" operator="in" />
+        </filter>
+        <filter id="Shadow_2" filterUnits="userSpaceOnUse" x="282.2" y="15.744938">
+            <feGaussianBlur in="SourceAlpha" result="blur" stdDeviation=".436" />
+            <feOffset in="blur" result="offset" dx="2" dy="2" />
+            <feFlood flood-color="#ff9300" flood-opacity=".5" result="flood" />
+            <feComposite in="flood" in2="offset" operator="in" />
+        </filter>
+        <filter id="Shadow_3" filterUnits="userSpaceOnUse" x="282.2" y="15.744938">
+            <feGaussianBlur in="SourceAlpha" result="blur" stdDeviation=".436" />
+            <feOffset in="blur" result="offset" dx="2" dy="2" />
+            <feFlood flood-color="#ff2600" flood-opacity=".5" result="flood" />
+            <feComposite in="flood" in2="offset" operator="in" result="color" />
+            <feMerge>
+                <feMergeNode in="color" />
+                <feMergeNode in="SourceGraphic" />
+            </feMerge>
+        </filter>
+        <filter id="Shadow_4" filterUnits="userSpaceOnUse" x="282.2" y="15.744938">
+            <feGaussianBlur in="SourceAlpha" result="blur" stdDeviation=".436" />
+            <feOffset in="blur" result="offset" dx="2" dy="2" />
+            <feFlood flood-color="#0096ff" flood-opacity=".5" result="flood" />
+            <feComposite in="flood" in2="offset" operator="in" result="color" />
+            <feMerge>
+                <feMergeNode in="color" />
+                <feMergeNode in="SourceGraphic" />
+            </feMerge>
+        </filter>
+    </defs>
+    <metadata> Produced by OmniGraffle 7.25\n2026-02-17 05:17:46 +0000</metadata>
+    <g id="Canvas_1" stroke-dasharray="none" stroke="none" fill="none" fill-opacity="1" stroke-opacity="1">
+        <title>Canvas 1</title>
+        <g id="Canvas_1_Layer_1">
+            <title>Layer 1</title>
+            <g id="Graphic_12_shadow" filter="url(#Shadow)">
+                <rect x="366" y="100.48047" width="608" height="81.28516" fill="white" />
+                <rect x="366" y="100.48047" width="608" height="81.28516" stroke="#0096ff" stroke-linecap="round"
+                    stroke-linejoin="round" stroke-width="1" />
+            </g>
+            <g id="Graphic_14_shadow" filter="url(#Shadow)">
+                <rect x="366" y="189.76562" width="180" height="435.7344" fill="white" />
+                <rect x="366" y="189.76562" width="180" height="435.7344" stroke="#0096ff" stroke-linecap="round"
+                    stroke-linejoin="round" stroke-width="1" />
+            </g>
+            <g id="Graphic_15_shadow" filter="url(#Shadow_2)">
+                <rect x="554" y="189.76562" width="420" height="435.7344" fill="white" />
+                <rect x="554" y="189.76562" width="420" height="435.7344" stroke="#ff9300" stroke-linecap="round"
+                    stroke-linejoin="round" stroke-width="1" />
+            </g>
+            <g id="Graphic_16_shadow" filter="url(#Shadow)">
+                <rect x="366" y="633.5" width="608" height="81.28516" fill="white" />
+                <rect x="366" y="633.5" width="608" height="81.28516" stroke="#0096ff" stroke-linecap="round"
+                    stroke-linejoin="round" stroke-width="1" />
+            </g>
+            <g id="Graphic_49">
+                <rect x="347" y="81.04085" width="648" height="652.95915" fill="white" />
+            </g>
+            <g id="Graphic_12">
+                <rect x="366" y="100.48047" width="608" height="81.28516" fill="white" />
+                <rect x="366" y="100.48047" width="608" height="81.28516" stroke="#0096ff" stroke-linecap="round"
+                    stroke-linejoin="round" stroke-width="1" />
+                <text transform="translate(371 131.89905)" fill="black">
+                    <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="256.216" y="15"
+                        xml:space="preserve">&lt; Header /&gt;</tspan>
+                </text>
+            </g>
+            <g id="Graphic_14">
+                <rect x="366" y="189.76562" width="180" height="435.7344" fill="white" />
+                <rect x="366" y="189.76562" width="180" height="435.7344" stroke="#0096ff" stroke-linecap="round"
+                    stroke-linejoin="round" stroke-width="1" />
+                <text transform="translate(371 398.4088)" fill="black">
+                    <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="40.584" y="15"
+                        xml:space="preserve">&lt; Sidebar /&gt;</tspan>
+                </text>
+            </g>
+            <g id="Graphic_15">
+                <rect x="554" y="189.76562" width="420" height="435.7344" fill="white" />
+                <rect x="554" y="189.76562" width="420" height="435.7344" stroke="#ff9300" stroke-linecap="round"
+                    stroke-linejoin="round" stroke-width="1" />
+                <text transform="translate(554 607.052)" fill="#ff9300">
+                    <tspan font-family="Helvetica Neue" font-size="16" fill="#ff9300" x="351.6" y="15"
+                        xml:space="preserve">&lt; Main /&gt;</tspan>
+                </text>
+            </g>
+            <g id="Graphic_16">
+                <rect x="366" y="633.5" width="608" height="81.28516" fill="white" />
+                <rect x="366" y="633.5" width="608" height="81.28516" stroke="#0096ff" stroke-linecap="round"
+                    stroke-linejoin="round" stroke-width="1" />
+                <text transform="translate(371 664.9186)" fill="black">
+                    <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="259.032" y="15"
+                        xml:space="preserve">&lt; Footer /&gt;</tspan>
+                </text>
+            </g>
+            <g id="Graphic_38">
+                <path
+                    d="M 884 221.95036 L 884 240.36702 L 964 240.36702 L 964 221.95036 L 964 210.36702 L 964 207.95036 C 964 203.53208 960.4183 199.95036 956 199.95036 L 892 199.95036 C 887.5817 199.95036 884 203.53208 884 207.95036 L 884 210.36702 Z"
+                    fill="#c0ffc0" />
+                <path
+                    d="M 884 221.95036 L 884 240.36702 L 964 240.36702 L 964 221.95036 L 964 210.36702 L 964 207.95036 C 964 203.53208 960.4183 199.95036 956 199.95036 L 892 199.95036 C 887.5817 199.95036 884 203.53208 884 207.95036 L 884 210.36702 Z"
+                    stroke="#009051" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" />
+            </g>
+            <g id="Graphic_39">
+                <path
+                    d="M 804 221.95036 L 804 240.36702 L 884 240.36702 L 884 221.95036 L 884 210.36702 L 884 207.95036 C 884 203.53208 880.4183 199.95036 876 199.95036 L 812 199.95036 C 807.5817 199.95036 804 203.53208 804 207.95036 L 804 210.36702 Z"
+                    fill="#ffc0c0" />
+                <path
+                    d="M 804 221.95036 L 804 240.36702 L 884 240.36702 L 884 221.95036 L 884 210.36702 L 884 207.95036 C 884 203.53208 880.4183 199.95036 876 199.95036 L 812 199.95036 C 807.5817 199.95036 804 203.53208 804 207.95036 L 804 210.36702 Z"
+                    stroke="#ff0002" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" />
+            </g>
+            <g id="Graphic_40">
+                <path
+                    d="M 724 221.95036 L 724 240.36702 L 804 240.36702 L 804 221.95036 L 804 210.36702 L 804 207.95036 C 804 203.53208 800.4183 199.95036 796 199.95036 L 732 199.95036 C 727.5817 199.95036 724 203.53208 724 207.95036 L 724 210.36702 Z"
+                    fill="#ffffc0" />
+                <path
+                    d="M 724 221.95036 L 724 240.36702 L 804 240.36702 L 804 221.95036 L 804 210.36702 L 804 207.95036 C 804 203.53208 800.4183 199.95036 796 199.95036 L 732 199.95036 C 727.5817 199.95036 724 203.53208 724 207.95036 L 724 210.36702 Z"
+                    stroke="#ff9300" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" />
+            </g>
+            <g id="Graphic_41">
+                <path
+                    d="M 644 221.95036 L 644 240.36702 L 724 240.36702 L 724 221.95036 L 724 210.36702 L 724 207.95036 C 724 203.53208 720.4183 199.95036 716 199.95036 L 652 199.95036 C 647.5817 199.95036 644 203.53208 644 207.95036 L 644 210.36702 Z"
+                    fill="#c0ffff" />
+                <path
+                    d="M 644 221.95036 L 644 240.36702 L 724 240.36702 L 724 221.95036 L 724 210.36702 L 724 207.95036 C 724 203.53208 720.4183 199.95036 716 199.95036 L 652 199.95036 C 647.5817 199.95036 644 203.53208 644 207.95036 L 644 210.36702 Z"
+                    stroke="#0096ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" />
+            </g>
+            <g id="Graphic_42">
+                <path
+                    d="M 564 221.95036 L 564 240.36702 L 644 240.36702 L 644 221.95036 L 644 210.36702 L 644 207.95036 C 644 203.53208 640.4183 199.95036 636 199.95036 L 572 199.95036 C 567.5817 199.95036 564 203.53208 564 207.95036 L 564 210.36702 Z"
+                    fill="#c0c0ff" />
+                <path
+                    d="M 564 221.95036 L 564 240.36702 L 644 240.36702 L 644 221.95036 L 644 210.36702 L 644 207.95036 C 644 203.53208 640.4183 199.95036 636 199.95036 L 572 199.95036 C 567.5817 199.95036 564 203.53208 564 207.95036 L 564 210.36702 Z"
+                    stroke="#011893" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" />
+            </g>
+            <g id="Graphic_44" filter="url(#Shadow_3)">
+                <rect x="564" y="249.7433" width="400" height="360.2567" fill="white" />
+                <rect x="564" y="249.7433" width="400" height="360.2567" stroke="#ff2600" stroke-linecap="round"
+                    stroke-linejoin="round" stroke-width="1" />
+                <text transform="translate(564 591.552)" fill="#ff2600">
+                    <tspan font-family="Helvetica Neue" font-size="16" fill="#ff2600" x="309.376" y="15"
+                        xml:space="preserve">&lt; Content /&gt;</tspan>
+                </text>
+            </g>
+            <g id="Graphic_45" filter="url(#Shadow_4)">
+                <rect x="573" y="260.97182" width="382" height="138.19484" fill="white" />
+                <rect x="573" y="260.97182" width="382" height="138.19484" stroke="#0096ff" stroke-linecap="round"
+                    stroke-linejoin="round" stroke-width="1" />
+                <text transform="translate(578 320.84525)" fill="black">
+                    <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="150.616" y="15"
+                        xml:space="preserve">&lt; Form /&gt;</tspan>
+                </text>
+            </g>
+            <g id="Graphic_46" filter="url(#Shadow_4)">
+                <rect x="573" y="408" width="382" height="187" fill="white" />
+                <rect x="573" y="408" width="382" height="187" stroke="#0096ff" stroke-linecap="round"
+                    stroke-linejoin="round" stroke-width="1" />
+                <text transform="translate(578 492.276)" fill="black">
+                    <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="141.152" y="15"
+                        xml:space="preserve">&lt; Preview /&gt;</tspan>
+                </text>
+            </g>
+        </g>
+    </g>
+</svg>
