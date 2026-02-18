@@ -205,8 +205,6 @@ Unlike arithmetic operators, there is no inherent rule in page layout that divis
 
 ## Compositional Syntax
 
-用户可以使用多行来表达同一个主体的层级关系和样式修饰，以增强可读性。相反，用户也可以将所有的层级关系和样式修饰写在同一行，以缩减行数。例如：
-
 Users can use multiple lines to express the hierarchical relationships and style modifications of the same entity for better readability. Conversely, users can also write all hierarchical relationships and style modifications on a single line to reduce line count. For example:
 
 ```
@@ -320,7 +318,6 @@ Therefore, **Luming**'s text parsing does not have a situation where 'a definiti
 
 * Entities arranged horizontally need to be connected with `+`. However, if they are within `[]` at the same level and there are no other operators that could cause ambiguity, the `+` can be omitted. For example: `A[B C[D E]]` is equivalent to `A [ B + C [ D + E ] ]`. Spaces are still required for separation; otherwise, `BC` would be interpreted as another entity name.
 
-* 样式语法中结尾的 ; 如果在行末或者与关系符相邻，可以省略，例如：`A: bg #fda; 70` 等价于 `A: bg #fda; 70;`。`A: bg #fda;/Footer` 等价于 `A: bg #fda/Footer`。
 * The trailing `;` in style syntax can be omitted if it is at the end of a line or adjacent to a relationship operator. For example: `A: bg #fda; 70` is equivalent to `A: bg #fda; 70;`. `A: bg #fda/Footer` is equivalent to `A: bg #fda;/Footer`.
 
 ## Best Practices
