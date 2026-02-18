@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg xmlns:xl="http://www.w3.org/1999/xlink" version="1.1" xmlns:dc="http://purl.org/dc/elements/1.1/"
-    xmlns="http://www.w3.org/2000/svg" viewBox="1205.3924 147.8973 97.83333 98" width="97.83333" height="98">
+    xmlns="http://www.w3.org/2000/svg" viewBox="1205.3924 148.3973 97.33333 97" width="97.33333" height="97">
     <defs>
-        <filter id="Shadow" filterUnits="userSpaceOnUse" x="1195.6091" y="138.0973">
+        <filter id="Shadow" filterUnits="userSpaceOnUse" x="1195.6591" y="138.6973">
             <feGaussianBlur in="SourceAlpha" result="blur" stdDeviation="3.488" />
             <feFlood flood-color="#45c3ce" flood-opacity=".5" result="flood" />
             <feComposite in="flood" in2="blur" operator="in" />
         </filter>
-        <filter id="Shadow_2" filterUnits="userSpaceOnUse" x="1195.6091" y="138.0973">
+        <filter id="Shadow_2" filterUnits="userSpaceOnUse" x="1195.6591" y="138.6973">
             <feGaussianBlur in="SourceAlpha" result="blur" stdDeviation="3.488" />
-            <feFlood flood-color="#ffca65" flood-opacity=".5" result="flood" />
+            <feFlood flood-color="#ffca65" result="flood" />
             <feComposite in="flood" in2="blur" operator="in" />
         </filter>
     </defs>
-    <metadata> Produced by OmniGraffle 7.25\n2026-02-17 05:57:35 +0000</metadata>
+    <metadata> Produced by OmniGraffle 7.25\n2026-02-18 08:39:39 +0000</metadata>
     <g id="Canvas_1" stroke-dasharray="none" stroke="none" fill="none" fill-opacity="1" stroke-opacity="1">
         <title>Canvas 1</title>
         <g id="Canvas_1_Layer_1">
@@ -27,7 +27,7 @@
             <g id="Graphic_48_shadow" filter="url(#Shadow_2)">
                 <rect x="1258.2257" y="156.8973" width="36" height="80" fill="#fffdc6" />
                 <rect x="1258.2257" y="156.8973" width="36" height="80" stroke="#ffca65" stroke-linecap="round"
-                    stroke-linejoin="round" stroke-width="2" />
+                    stroke-linejoin="round" stroke-width="1" />
             </g>
             <g id="Graphic_47">
                 <rect x="1213.8924" y="156.8973" width="36" height="80" fill="#b9f9ff" />
@@ -37,7 +37,7 @@
             <g id="Graphic_48">
                 <rect x="1258.2257" y="156.8973" width="36" height="80" fill="#fffdc6" />
                 <rect x="1258.2257" y="156.8973" width="36" height="80" stroke="#ffca65" stroke-linecap="round"
-                    stroke-linejoin="round" stroke-width="2" />
+                    stroke-linejoin="round" stroke-width="1" />
             </g>
         </g>
     </g>
