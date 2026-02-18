@@ -1,43 +1,43 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg xmlns:xl="http://www.w3.org/1999/xlink" version="1.1" xmlns:dc="http://purl.org/dc/elements/1.1/"
-    xmlns="http://www.w3.org/2000/svg" viewBox="1205.0591 264.62496 98 97.83333" width="98" height="97.83333">
+    xmlns="http://www.w3.org/2000/svg" viewBox="1212.4967 358.85376 97 97.33333" width="97" height="97.33333">
     <defs>
-        <filter id="Shadow" filterUnits="userSpaceOnUse" x="1195.2591" y="254.84163">
+        <filter id="Shadow" filterUnits="userSpaceOnUse" x="1202.7967" y="349.12043">
             <feGaussianBlur in="SourceAlpha" result="blur" stdDeviation="3.488" />
             <feFlood flood-color="#45c3ce" flood-opacity=".5" result="flood" />
             <feComposite in="flood" in2="blur" operator="in" />
         </filter>
-        <filter id="Shadow_2" filterUnits="userSpaceOnUse" x="1195.2591" y="254.84163">
+        <filter id="Shadow_2" filterUnits="userSpaceOnUse" x="1202.7967" y="349.12043">
             <feGaussianBlur in="SourceAlpha" result="blur" stdDeviation="3.488" />
-            <feFlood flood-color="#ffca65" flood-opacity=".5" result="flood" />
+            <feFlood flood-color="#ffca65" result="flood" />
             <feComposite in="flood" in2="blur" operator="in" />
         </filter>
     </defs>
-    <metadata> Produced by OmniGraffle 7.25\n2026-02-17 05:57:35 +0000</metadata>
+    <metadata> Produced by OmniGraffle 7.25\n2026-02-18 08:39:39 +0000</metadata>
     <g id="Canvas_1" stroke-dasharray="none" stroke="none" fill="none" fill-opacity="1" stroke-opacity="1">
         <title>Canvas 1</title>
         <g id="Canvas_1_Layer_1">
             <title>Layer 1</title>
             <g id="Graphic_288_shadow" filter="url(#Shadow)">
-                <rect x="1214.0591" y="273.12496" width="80" height="36" fill="#b9f9ff" />
-                <rect x="1214.0591" y="273.12496" width="80" height="36" stroke="#45c3ce" stroke-linecap="round"
+                <rect x="1220.9967" y="367.35376" width="80" height="36" fill="#b9f9ff" />
+                <rect x="1220.9967" y="367.35376" width="80" height="36" stroke="#45c3ce" stroke-linecap="round"
                     stroke-linejoin="round" stroke-width="1" />
             </g>
             <g id="Graphic_287_shadow" filter="url(#Shadow_2)">
-                <rect x="1214.0591" y="317.4583" width="80" height="36" fill="#fffdc6" />
-                <rect x="1214.0591" y="317.4583" width="80" height="36" stroke="#ffca65" stroke-linecap="round"
-                    stroke-linejoin="round" stroke-width="2" />
+                <rect x="1220.9967" y="411.6871" width="80" height="36" fill="#fffdc6" />
+                <rect x="1220.9967" y="411.6871" width="80" height="36" stroke="#ffca65" stroke-linecap="round"
+                    stroke-linejoin="round" stroke-width="1" />
             </g>
             <g id="Graphic_288">
-                <rect x="1214.0591" y="273.12496" width="80" height="36" fill="#b9f9ff" />
-                <rect x="1214.0591" y="273.12496" width="80" height="36" stroke="#45c3ce" stroke-linecap="round"
+                <rect x="1220.9967" y="367.35376" width="80" height="36" fill="#b9f9ff" />
+                <rect x="1220.9967" y="367.35376" width="80" height="36" stroke="#45c3ce" stroke-linecap="round"
                     stroke-linejoin="round" stroke-width="1" />
             </g>
             <g id="Graphic_287">
-                <rect x="1214.0591" y="317.4583" width="80" height="36" fill="#fffdc6" />
-                <rect x="1214.0591" y="317.4583" width="80" height="36" stroke="#ffca65" stroke-linecap="round"
-                    stroke-linejoin="round" stroke-width="2" />
+                <rect x="1220.9967" y="411.6871" width="80" height="36" fill="#fffdc6" />
+                <rect x="1220.9967" y="411.6871" width="80" height="36" stroke="#ffca65" stroke-linecap="round"
+                    stroke-linejoin="round" stroke-width="1" />
             </g>
         </g>
     </g>
