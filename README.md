@@ -173,7 +173,7 @@ Although **Luming** cannot directly generate complete design drafts or high-fide
 
 <img src='./img/A+B.svg' height="60" style="vertical-align: bottom;" > ：`A + B` means A and B are on the same level, with A to the left and B to the right.
 
-<img src='./img/BbAdCb.svg' height="60" style="vertical-align: bottom;" > ：`B [ A / C ]` means B is the container for A and C. `[]` indicates a containment relationship.
+<img src='./img/BbAdCb.svg' height="60" style="vertical-align: bottom;" > ：`A [ B / C ]` means A is the container for B and C. `[]` indicates a containment relationship.
 
 <img src='./img/A+BdC.svg' height="60" style="vertical-align: bottom;" >：`A + B / C` means A is at the top-left, B at the top-right, and C is below A and B, all on the same hierarchical level.
 

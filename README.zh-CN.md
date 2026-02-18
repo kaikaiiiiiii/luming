@@ -172,7 +172,7 @@ export default {
 
 <img src='./img/A+B.svg' height="60" style="vertical-align: bottom;" > ：`A + B` 表示 A 和 B 在同一层级，A 在左，B 在右。
 
-<img src='./img/BbAdCb.svg' height="60" style="vertical-align: bottom;" > ：`B [ A / C ]` 表示 B 是 A、C 的容器。`[]` 表示包含关系。
+<img src='./img/BbAdCb.svg' height="60" style="vertical-align: bottom;" > ：`A [ B / C ]` 表示 A 是 B、C 的容器。`[]` 表示包含关系。
 
 <img src='./img/A+BdC.svg' height="60" style="vertical-align: bottom;" >：`A + B / C` 表示 A 左上， B 右上， C 在 A B 的下方，三者同一层级。
 
