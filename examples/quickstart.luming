@@ -1,0 +1,6 @@
+Header / Sidebar + Main [ Tabs / Content ] / Footer
+Content [Form / Preview]
+
+Main: bg #fda; 70;
+Tabs: label;
+Form: rd 4;

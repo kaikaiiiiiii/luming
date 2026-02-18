@@ -1,5 +1,1 @@
-interface LumingBody {
-    template: string;
-    style: string;
-
-}
+export * from "./src";

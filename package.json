@@ -1,0 +1,29 @@
+{
+    "name": "luming",
+    "version": "0.1.0",
+    "description": "Textual DSL parser and compiler for static page structure descriptions.",
+    "license": "MIT",
+    "main": "dist/index.js",
+    "types": "index.d.ts",
+    "bin": {
+        "luming": "dist/cli.js"
+    },
+    "files": [
+        "dist",
+        "src",
+        "index.d.ts",
+        "README.md",
+        "README.zh-CN.md"
+    ],
+    "scripts": {
+        "build": "tsc -p tsconfig.json",
+        "clean": "rm -rf dist",
+        "typecheck": "tsc -p tsconfig.json --noEmit",
+        "preview": "node dist/cli.js preview",
+        "generate": "node dist/cli.js generate"
+    },
+    "devDependencies": {
+        "@types/node": "^22.13.10",
+        "typescript": "^5.7.3"
+    }
+}
