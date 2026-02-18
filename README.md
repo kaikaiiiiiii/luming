@@ -1,35 +1,37 @@
-#  路明（Luming）
+#  **Luming**（路明）
 
-<span style='color: #ffb464; font-weight: bold;'>路明（Luming）</span> 是一种用于描述静态页面结构的文本语言和配套实现工具。它的核心目标是提供一种 **简化、可读的界面结构表达语言**。
+[简体中文](./README.zh-CN.md) | [English](./README.md)
+
+<span style='color: #ffb464; font-weight: bold;'>**Luming**</span> is a textual language and accompanying implementation tool used to describe static page structures. Its core goal is **to provide a simplified, readable textual expression for webpage interface structures.**
 
 ## Why Luming?
 
-在前端开发中，开发者常常需要将抽象的页面想法、布局草图或交互思路转化为可视化结果。传统设计工具或矢量图格式往往使用较为繁琐，或者生成的结果难以直接映射为可复用的代码组件。
+In front-end development, developers often need to translate abstract page ideas, layout sketches, or interaction concepts into visual results. Traditional design tools or vector graphic formats can be cumbersome to use, or the results they generate are difficult to map directly into reusable code components.
 
-路明 的设计哲学正是针对这一空白：**让页面结构、布局关系与视觉层级可以通过清晰、简洁的文本语言进行表达，同时保留生成预览的能力**。
+**Luming**'s design philosophy addresses this gap: **Allowing page structure, layout relationships, and visual hierarchy to be expressed through clear, concise text, while retaining the ability to generate previews.**
 
-目标：
+Goals:
 
-* 用简洁文本表达页面结构层级
-* 可进行版本控制（diff-friendly）
-* 可快速生成结构预览
-* 辅助 Vibe Coding 和结构沟通
+* Express page structure hierarchy using concise text
+* Enable version control (diff-friendly)
+* Quickly generate structural previews
+* Compatible with Vibe Coding and structural communication 
 
-特性：
+Features:
 
-- 基于文本的 DSL，描述界面结构  
-- 支持 **组合**、**布局**、**覆盖式声明** 等特性
-- 分离结构与样式修饰，保持页面层级清晰  
-- 可与 AI 或自动化工具结合，映射为前端组件（Vue、React 等）  
+* Text-based DSL for describing interface structures
+* Supports features like **composition**, **layout**, and **declarative overrides**
+* Separates structure from style modifications, maintaining clear page hierarchy
+* Can be combined with AI or automation tools to map to front-end components (Vue, React, etc.)
 
-约束：
+Constraints:
 
-* 不是视觉设计替代工具
-* 不是 CSS 替代品
-* 不是前端框架
-* 不是动态模板语言
+* Not a replacement for visual design tools
+* Not a CSS substitute
+* Not a front-end framework
+* Not a dynamic templating language
 
-## 快速开始
+## Quick Start
 
 ```text
 Header / Sidebar + Main [ Tabs / Content ] / Footer
@@ -39,11 +41,11 @@ Main: bg #fda; 70;
 Tabs: label;
 Form: rd 4;
 ```
-以上文本可以被 路明 解析为一个可视化的界面预览：
+The above text can be parsed by **Luming** into a visual interface preview:
 
 ![](./img/quickstart.svg)
 
-或者进一步生成前端代码组件：
+Or further, to generate front-end code components:
 
 ```vue
 <script setup>
@@ -88,39 +90,39 @@ export default {
 
 ...
 ```
-或直接生成面向 AI 模型的提示词：
+Or directly generate prompts for AI models:
 
 ```text
-请根据以下描述生成页面布局代码，包括 HTML 和 CSS：
-- 页面从上到下依次为 Header、tmp_123、Footer 3部分，从上到下。
-- tmp_123 包括 Sidebar 、Main 2 部分，从左到右。
-- Main 包含 Tabs 和 Conten 2 部分，从上到下。
-- Content 内部包含 Form 和 Preview 2 部分，从上到下。
-- Main 的背景色为 #fda，宽度为 70%。
-- Tabs 的样式为 label，具体样式为 ......
-- Form 的圆角为 4px。
+Please generate page layout code, including HTML and CSS, based on the following description:
+- The page consists of three parts from top to bottom: Header, tmp_123, Footer, arranged vertically.
+- tmp_123 consists of two parts: Sidebar and Main, arranged horizontally.
+- Main contains Tabs and Content, arranged vertically.
+- Content internally contains Form and Preview, arranged vertically.
+- Main has a background color of #fda and a width of 70%.
+- Tabs uses the 'label' style, with the specific style being ...
+- Form has a border radius of 4px.
 
-额外需求包括：
-- 生成的代码应使用现代的 HTML5 和 CSS3 标准。
-- 代码应具有良好的可读性和结构化，便于后续维护和扩展。
-- 生成的 CSS 应该尽可能简洁，避免冗余的样式定义。
-- 每个我定义的主体（如 Header、Sidebar、Main 等）都应该被实现为一个独立的模块或组件，以便在实际项目中进行复用。
-- 生成的代码应考虑响应式设计，以适应不同屏幕尺寸和设备类型。
+Additional requirements include:
+- The generated code should use modern HTML5 and CSS3 standards.
+- The code should be well-readable and structured for easy maintenance and extension.
+- The generated CSS should be as concise as possible, avoiding redundant style definitions.
+- Each main entity I define (such as Header, Sidebar, Main, etc.) should be implemented as an independent module or component for reuse in actual projects.
+- The generated code should consider responsive design to adapt to different screen sizes and device types.
 ```
 
-在快速示例中，我们定义了一个包含 Header、Sidebar、Main 和 Footer 的页面结构。Main 内部包含 Tabs 和 Content，Content 又包含 Form 和 Preview。通过简洁的语法，我们可以清晰地表达页面的层级关系和布局方式。
+In the quick example, we defined a page structure containing Header, Sidebar, Main, and Footer. Inside Main, there are Tabs and Content, and Content further contains Form and Preview. With concise syntax, we can clearly express the page's hierarchical relationships and layout.
 
-在结构之外，我们还可以为每个主体添加样式修饰，例如 Main 的背景色、Tabs 的标签样式、Sidebar 的宽度以及 Form 的圆角。这些样式是独立于结构定义的，保持了页面层级的清晰，同时也提供了足够的灵活性来调整视觉效果。
+Beyond the structure, we can also add style modifiers for each entity, such as Main's background color, Tabs' label style, Sidebar's width, and Form's border radius. These styles are defined separately from the structure, keeping the page hierarchy clear while providing enough flexibility to adjust the visual effect.
 
-尽管 路明 无法直接生成完整的设计稿或高保真原型，或生成完全可用的前端代码，但 路明 的目标是提供一种 **快速表达和迭代界面结构的工具**，帮助开发者快速预览原型，搭建可用的组件骨架，这在 Vibe Coding 中尤其有用。
+Although **Luming** cannot directly generate complete design drafts or high-fidelity prototypes, or produce fully functional front-end code, its goal is to provide **a tool for quickly expressing and iterating on web interface structures**, helping developers rapidly prototype and build usable component skeletons, which is particularly useful in Vibe Coding.
 
-# 语法 v0.1
+# Syntax v0.1
 
-<span style='color: #ffb464; font-weight: bold;'>路明</span> 的语法设计旨在简洁、直观，能够快速表达界面结构和布局关系。以下是 v0.1 版本的基本语法规则：
+<span style='color: #ffb464; font-weight: bold;'>**Luming**</span>'s syntax is designed to be concise and intuitive, allowing for the quick expression of interface structures and layout relationships. Here are the basic syntax rules for version v0.1:
 
-## 主体名称
+## Entity Names
 
-* 主体通过名称定义，主体名称必须以字母开头，可以包含字母、数字和下划线。多个主体可以通过空格、换行或主体关系表达符分隔。例如：
+* Entities are defined by names, which must start with a letter and can contain letters, numbers, and underscores. Multiple entities can be separated by spaces, newlines, or relationship operators. For example:
 
   ```
   Part1
@@ -129,13 +131,13 @@ export default {
   under_score_name
   ```
 
-* 在同一个文档中，同一个主体名称可以在多行出现，它们会被视为同一个主体。用户无须写下超长单行来表达复杂的层级关系。例如：
+* Within the same document, the same entity name can appear on multiple lines, and they will be treated as the same entity. Users do not need to write overly long single lines to express complex hierarchies. For example:
 
   ```
   Header / Sidebar + Main [ Tabs / Content [Form / Preview]] / Footer
   ```
 
-  等效于：
+  is equivalent to:
 
   ```
   Header / Sidebar + Main  / Footer
@@ -143,66 +145,69 @@ export default {
   Content [Form / Preview]
   ```
 
-  等效于：
+  is equivalent to:
+
   ```
   Header / Sidebar + Main / Footer
                      Main [ Tabs / Content ]
                                    Content [ Form / Preview]
   ```
-* 当同一行出现多个同名主体时，它们会被视为同一主体的多个不同副本，例如：
 
+* When multiple same name entities appear on the same line, they are treated as multiple distinct copies of that entity. For example:
   ```
   List [Item Item Item]
   Item [ Icon Text ]
   ```
-  等效于
+  is equivalent to:
   ```
   List [Item[ Icon Text ] Item[ Icon Text ] Item[ Icon Text ]]
   ```
 
-> 再次重申，路明 的目标并不是直接生成完备的工程级代码，不包括诸如组件实例化、生命周期、Mixin 等功能。允许同一行出现多个同名主体是因为这是原型界面中非常觉见而典型的场景。但在实际工程中，主体的循环复用往往与实际的业务数据遍历相关，由工程代码生成。路明 并不会帮助你生成循环代码，只帮助你在原型阶段快速表达出这种结构关系，以便迭代和预览。
+> To clarify again, **Luming**'s goal is not to directly generate production-ready engineering code, and it does not include features like component instantiation, lifecycle methods, or mixins. Allowing multiple entities with the same name on one line is because this is a very common and typical scenario in prototyping interfaces. However, in actual engineering, the cyclic reuse of components is often related to iterating over real business data, which is handled by engineering code generation. **Luming** does not help you generate loop code; it only helps you quickly express this structural relationship during the prototyping phase for iteration and preview.
 
-## 布局关系表达式：
+## Layout Relationship Expressions
 
-<img src='./img/AdB.svg' height="60" style="vertical-align: bottom;" > ：`A / B` 表示在同一层级，A 在上，B 在下。这是无排版的 HTML 文档中最常见的排列关系。  
+<img src='./img/AdB.svg' height="60" style="vertical-align: bottom;" > ：`A / B` means A is above B at the same hierarchical level. This is the most common arrangement in uncomposed HTML documents.
 
-<img src='./img/A+B.svg' height="60" style="vertical-align: bottom;" > ：`A + B` 表示 A 和 B 在同一层级，A 在左，B 在右。
+<img src='./img/A+B.svg' height="60" style="vertical-align: bottom;" > ：`A + B` means A and B are on the same level, with A to the left and B to the right.
 
-<img src='./img/CbAdBb.svg' height="60" style="vertical-align: bottom;" > ：`C [ A / B ]` 表示 C 是 A、B 的容器。`[]` 表示包含关系。
+<img src='./img/CbAdBb.svg' height="60" style="vertical-align: bottom;" > ：`C [ A / B ]` means C is the container for A and B. `[]` indicates a containment relationship.
 
-<img src='./img/A+BdC.svg' height="60" style="vertical-align: bottom;" >：`A + B / C` 表示 A 左上， B 右上， C 在 A B 的下方，三者同一层级。
+<img src='./img/A+BdC.svg' height="60" style="vertical-align: bottom;" >：`A + B / C` means A is at the top-left, B at the top-right, and C is below A and B, all on the same hierarchical level.
 
-<img src='./img/A+cBdCc.svg' height="60" style="vertical-align: bottom;" >：`A + (B / C)` 表示 A 在左，B 在上，C 右下，三者同一层级。**`()`** 表示在同层内，强制优先级处理。也就是说 BC 先合起来，再与 A 进行左右排列关系的处理。
+<img src='./img/A+cBdCc.svg' height="60" style="vertical-align: bottom;" >：`A + (B / C)` means A is on the left, B is at the top, and C is at the bottom-right, all on the same level. `()` indicates forcing priority within the same level. That is, B and C are grouped together first, then this group is arranged horizontally with A.
 
-注： `()` 分组符是一个特殊的符号，在不同的布局方案中它有不同的实现方式。在 flex 或更早的 float 布局中，需要借助一个容器元素才能实现对应效果。这种情况下 `()` 等效于一个匿名的 `[]`，对于 Grid 布局来说，则不需要额外的容器元素，而是直接在同一层级内调整元素的排列方式。根据 路明 的设计哲学，`()` 在语义上被定义为『布局运算优先级』而非直接映射为匿名容器或层级关系。
+Note: The `()` grouping symbol is a special one, implemented differently in various layout schemes. In flexbox layouts, or older in float layouts, an extra container element is needed to achieve the corresponding effect. In such cases, `()` is equivalent to an anonymous `[]`. For Grid layout, no extra container element is required; elements are arranged directly within the same level. According to **Luming**'s design philosophy, `()` is semantically defined as '**layout operation priority**' rather than directly mapping to an anonymous container or hierarchical relationship.
 
-## 关系优先级
+## Operator Precedence
 
-在同一行内，关系符的优先级为：`[]` > `()` > `+` > `/`。
+Within the same line, the precedence of operators is: `[]` > `()` > `+` > `/`。
 
-* 例如，对于 `A + B / (C / D [ E + F ])`，首先处理 `[]`，将 E 和 F 左右组合成一个整体，作为 D 的内容。
-* 然后在 `A + B / (C / D)`处理 `()`，将 C 和 D 上下组合成一个整体
-* 第三处理 `+`，将 A 和 B 左右组合为一个整体。
-* 最后处理 `/`，将 A+B 和 C/D 上下组合为一个整体。
+* For example, for `A + B / (C / D [ E + F ])`, first `[]` is processed, grouping E and F horizontally as a whole, making it the content of D.
+* Then, within `A + B / (C / D)`, `()` is processed, grouping C and D vertically as a whole.
+* Third, `+` is processed, grouping A and B horizontally as a whole.
+* Finally, `/` is processed, grouping A+B and C/D vertically as a whole.
 
-或者换种理解：
+Alternatively, think of it this way:
+  
+* First, extract the contents within `[]` and `()`.
+* Then, use `/` to split the entities and parenthesized groups, arranging them vertically.
+* Finally, check within each group for `+`, and arrange horizontally if present. 
+* For example, `A / B + C + D / E` is equivalent to `A / (B + C + D ) / E`
 
-* 先将 `[]` `()` 内的提取出来。
-* 再用 `/` 把主体和括号组切分后上下排列。
-* 最后再看每组内是否有 `+`，有则左右排列。 
-* 例如 `A / B + C + D / E`，等效于 `A / (B + C + D ) / E`
+Unlike arithmetic operators, there is no inherent rule in page layout that division is tighter than addition. Considering that page layout naturally flows from top to bottom, **Luming** chose a precedence rule that processes vertical relationships first, then horizontal relationships within the same level, aligning better with the natural hierarchy of page structures.
 
-与四则运行符不同，页面布局并不存在除法比加法更紧密的规则。考虑到页面排版天然是从上到下的，路明 选择了在同一层级内先处理上下关系，再处理左右关系的优先级规则，以更符合页面结构的自然层次。
+## Styles
 
-## 样式
+`: ;`: Content between `:` and `;` represents style modifications. For example: `A: bg #fda; 70;` means entity A has a background color of #fda and a width of 70%. Style properties are separated by semicolons. The style modification part starts with a colon and ends with a semicolon. Style properties can be complete CSS styles, or abbreviations or style classes provided by **Luming**'s presets.
 
-**`:` `;`** 之间的内容表示样式修饰，例如：`A: bg #fda; 70;` 表示主体 A 的背景色为 #fda，宽度为 70%。每个样式属性之间用分号分隔，样式修饰部分以冒号开头，样式属性可以是完整的 CSS 样式，或由 路明 预置提供的缩写或样式类。
+**Luming**'s design goal is to quickly express and iterate on interface structures, not to replace professional design tools or generate high-fidelity design drafts. It primarily focuses on layout and hierarchical relationships, rather than detailed visual design. Nevertheless, **Luming** supports direct use of CSS styles and also offers some common CSS shorthand abbreviations and even several predefined CSS classes to save time. For a specific list, please refer to [the documentation](./docs/style.md).
 
-路明 的设计目标是快速表达和迭代界面结构，并非用于替代专业设计工具或负责生成高保真设计稿。它主要关注于布局和层级关系，而不是细节的视觉设计。尽管如此，路明 支持直接使用 CSS 样式，也提供了一些常用 CSS 的缩写简写，甚至直接提供了若干预定义的 CSS 类以节约时间，具体列表可以[参考文档](./docs/style.md)。
-
-## 组合式语法
+## Compositional Syntax
 
 用户可以使用多行来表达同一个主体的层级关系和样式修饰，以增强可读性。相反，用户也可以将所有的层级关系和样式修饰写在同一行，以缩减行数。例如：
+
+Users can use multiple lines to express the hierarchical relationships and style modifications of the same entity for better readability. Conversely, users can also write all hierarchical relationships and style modifications on a single line to reduce line count. For example:
 
 ```
 H / L + R / F
@@ -210,69 +215,69 @@ R[ T / V ]
 R: bg #fda; 70;
 ```
 
-等效于
+is equivalent to
 
 ```
 H / L + R [ T / V ]: bg #fda; 70;/F
 ```
 
-## 高阶用法
+## Advanced Usage
 
-路明 允许用户在同一文档中多次定义同一个主体的样式或属性，也允许使用组合式语法以获得更灵活的表达方式。这些机制的初衷是为了让 路明 文档更具可读性，但这一灵活也为 路明 额外带来了新的特性：
+**Luming** allows users to define styles or properties for the same entity multiple times within the same document, and also permits the use of compositional syntax for more flexible expression. These mechanisms are initially intended to enhance the readability of **Luming** documents, but this flexibility also brings additional features to **Luming**:
 
-* 行内重复：当同一行内出现多个同名主体时，它们会被视为同一主体的多个不同副本，例如：
+* Inline Repetition: When multiple entities with the same name appear on the same line, they are treated as multiple distinct copies of that entity. For example:
 
   ```
   List [Item Item Item]
   ```
 
-* 主体样式与副本单独样式：
+* Entity Style vs. Individual Copy Style:
 
   ```
   List [Item: bg #99f; Item Item]
   Item: bg #f99;
   ```
-  最终效果是 List 内的第一个 Item 的背景色为 <span style="background-color: #99f;">#99f</span>，第二、三个 Item 的背景色为 <span style="background-color: #f99;">#f99</span>。
+  The final effect is that the first Item inside List has a background color of <span style="background-color: #99f;">#99f</span>, while the second and third Items have a background color of <span style="background-color: #f99;">#f99</span>.
 
-* 后继定义覆盖先前定义：
+* Subsequent Definitions Override Previous Definitions:
   
-  同一主体在文档中被多次定义时，后定义的属性会覆盖前面的属性，例如：
-
+  When the same entity is defined multiple times in a document, later defined properties override earlier ones. For example:
   ```
   A: bg #fda; 70;
   A: bg #99f;
   ```
-  的最终效果是 A 的背景色为 <span style="background-color: #99f;">#99f</span>，宽度仍为 70%。
 
-  同样的规则也适用于层级关系和包含关系，例如：
+  The final effect is that A's background color is <span style="background-color: #99f;">#99f</span>, and its width remains 70%.
+
+  The same rule applies to hierarchical relationships and containment. For example:
 
   ```
   A / B
   A + B
   ```
-  的最终效果是 A 和 B 在同一层级，A 在左，B 在右。
+  The final effect is that A and B are on the same level, with A on the left and B on the right.
 
   ```
   A [ B C ]
   A [ D E ]
   ```
-  的最终效果是 A 包含 D 和 E，而 B 和 C 不再是 A 的内容。
+  The final effect is that A contains D and E, while B and C are no longer content of A.
 
-* 复用副本。
+* Reusing Copies
 
-  有两种方式可以复用同一主体的副本：
+  There are two ways to reuse copies of the same entity:
   
   ```
   List [Item Item Item]
   ```
-  和
+  and
   ```
   Page [ Content ]
   Main [ Content ]
   ```
-  请注意，这里并非后续定义覆盖先前定义。Main 的定义并不会覆盖 Page 的定义，反之亦然。它们只是共享了一个 Content 主体。在渲染阶段，Content 会生成两个副本分别置于 Page 和 Main 内。
+  Note that this is not a case of a subsequent definition overriding a previous one. The definition of Main does not override the definition of Page, and vice versa. They simply share a Content entity. During the rendering phase, two copies of Content will be generated, one placed inside Page and one inside Main.
 
-* 有限展开
+* Finite Expansion
 
   ```
   A [A]
@@ -280,106 +285,111 @@ H / L + R [ T / V ]: bg #fda; 70;/F
   B [C]
   C [B]
   ```
-  在 路明 的设计中，循环包含是允许的，但被明确定义为有限展开。当一个主体在其展开层级关系中直接或间接包含了自己时，路明 解析器会将该主体再次展开为一个副本，并检查当前展开是否形成环路而中止。该主体最终会同时成为一个循环的起点和终点。对于以上两个示例，其最终结果为：
+  In **Luming**'s design, circular inclusion is allowed but is explicitly defined as finite expansion. When an entity directly or indirectly includes itself within its expanded hierarchical relationship, the **Luming** parser will expand that entity again as a copy and check if the current expansion forms a loop, at which point it stops. The entity ultimately becomes both the start and end point of a cycle. For the two examples above, the final results are:
+
   ```
   A
-  └─A(终点)
+  └─A(Terminus)
   B
   └─C
-    └─B(终点)
+    └─B(Terminus)
   ```
 
 
-## 进一步了解
+## Further Understanding
 
-理解高级用法的原理，需要了解 路明 解析器的处理流程。
+To understand the principles behind the advanced usage, it's necessary to know the processing flow of the **Luming** parser.
 
-路明 是一个简单的描述语言，而非完整的运行时环境，它不存在真正意义上的变量、函数或生命周期机制。它的处理流程可以分为以下几个阶段：
+**Luming** is a simple descriptive language, not a full runtime environment. It does not have true variables, functions, or lifecycle mechanisms. Its processing flow can be divided into the following stages:
 
-**文本解析**：路明 解析器首先会将输入的文本逐行进行解析，从每一行识别出主体名称、层级关系、样式修饰等元素，并将源码转为解析器自有的数据结构。
+**Text Parsing**: The **Luming** parser first parses the input text line by line, identifying entity names, hierarchical relationships, style modifications, and other elements from each line, and converts the source code into the parser's own internal data structures.
 
-当后续行出现同名主体时，路明 会按一定规则合并到已有的数据结构中。因此后定义就可能覆盖前定义。但不同的属性在遇到冲突时会有不同的处理方式。详细的处理规则可以参考[文档](./docs/compile.md)。
+When subsequent lines contain the same entity name, **Luming** merges them into the existing data structure according to specific rules. Therefore, later definitions can override earlier ones. However, different properties may have different handling methods when conflicts occur. For detailed handling rules, please refer to [the documentation](./docs/parser.md).
 
-**副本生成**：在解析完成后，生成器会根据解析得到的数据结构生成可视化预览或前端代码组件。在这个阶段，生成器会遍历主体的层级关系和样式修饰来生成对应的 HTML、CSS 和 JavaScript 代码。如果一个主体没有被其它主体包含，那么它就会按文档中最初出现的顺序生成独立副本；如果一个主体在任何位置可能被其它主体包含，它就只会在被包含的位置生成副本。
+**Copy Generation**: After parsing is complete, the generator produces a visual preview or front-end code components based on the parsed data structure. During this phase, the generator traverses the hierarchical relationships and style modifications of entities to generate corresponding HTML, CSS, and JavaScript code. If an entity is not contained by any other entity, it will generate independent copies in the order they first appear in the document; if an entity might be contained by others in any position, it will only generate copies within those containing positions.
 
-**代码组合**：在生成代码的过程中，生成器会根据输入参数，在生成主体副本组合时，额外附加对应模式的相关代码。
+**Code Composition**: During code generation, the generator will, based on input parameters, append relevant code corresponding to the specific mode when combining the generated entity copies.
 
-因此，路明 的文本解析不存在『后继行的定义覆盖前面行中已经存在的副本属性』的情况。因为所有副本都是在全局范围最后生成的，而不是在行内实时局部处理的。
+Therefore, **Luming**'s text parsing does not have a situation where 'a definition in a subsequent line overrides properties of a copy that already existed in a previous line'. This is because all copies are ultimately generated globally, not processed locally line by line in real-time.
 
-## 规则宽容
+## Rule Tolerance
 
-路明 设置了一些宽容的语法规则，以提高用户的输入效率和自身的容错能力：
+**Luming** establishes some tolerant syntax rules to improve user input efficiency and its own error resilience:
 
-* 任意数量的空格、\tab 在语法上都被视为一个空格，以便增强 路明 文档的排版能力。关系符左右的空格也是可省略的。
+* Any number of spaces or tabs are treated as a single space syntactically, enhancing the formatting capabilities of **Luming** documents. Spaces around relationship operators are also optional.
 
-* 左右排列的主体需要用 `+` 连接，但如果它们是在 [] 内部的同一层级，且不再有其它会引起歧义的关系符时，可以省略 `+`，例如：`A[B C[D E]]` 等价于 `A [ B + C [ D + E ] ]`。但仍需空格分隔，否则 `BC` 会被视为另一个主体名称。
+* Entities arranged horizontally need to be connected with `+`. However, if they are within `[]` at the same level and there are no other operators that could cause ambiguity, the `+` can be omitted. For example: `A[B C[D E]]` is equivalent to `A [ B + C [ D + E ] ]`. Spaces are still required for separation; otherwise, `BC` would be interpreted as another entity name.
 
 * 样式语法中结尾的 ; 如果在行末或者与关系符相邻，可以省略，例如：`A: bg #fda; 70` 等价于 `A: bg #fda; 70;`。`A: bg #fda;/Footer` 等价于 `A: bg #fda/Footer`。
+* The trailing `;` in style syntax can be omitted if it is at the end of a line or adjacent to a relationship operator. For example: `A: bg #fda; 70` is equivalent to `A: bg #fda; 70;`. `A: bg #fda/Footer` is equivalent to `A: bg #fda;/Footer`.
 
-## 最佳实践
+## Best Practices
 
-* 始终从唯一的主体名称开始定义界面结构，避免使用过于通用的名称（如 `Container`、`Wrapper` 等），以提高可读性和维护性。
+* Always start defining the interface structure with unique main entity, avoiding overly generic names (like Container, Wrapper), to improve readability and maintainability.
 
-* 避免通过行序来上下排版，使用明确的关系表达式（如 `/`、`+`、`[]`）来定义层级关系和布局关系，以增强结构的清晰度。避免解析器的未定义行为。
+* Avoid arranging layout based on line order. Use explicit relationship expressions (like `/`, `+`, `[]`) to define hierarchical and layout relationships for enhanced structural clarity. Avoid undefined parser behavior.
 
-* 定义同一主体的样式时，尽量在同一行或相邻行进行定义，以避免后继行覆盖带来的混淆。
+* When defining styles for the same entity, try to do so on the same line or adjacent lines to avoid confusion caused by subsequent lines overriding previous ones.
 
-* 尽管 路明 明确定义了循环引用的处理规则，仍应避免循环引用等复杂的层级关系，这不符合通常的界面结构设计原则。
+* Although **Luming** explicitly defines the handling rules for circular references, complex hierarchical relationships like circular references should still be avoided, as they generally do not conform to standard interface structure design principles.
 
-* 尽量使用显式包含关系（`[]`）来定义组件的层级关系，而不依赖于 `()` 强行调整布局优先级，以获得编译结果最大的兼容性。
+* Prefer using explicit containment `[]` to define component hierarchies rather than relying on `()` to forcibly adjust layout priority, for maximum compatibility with the compilation results.
 
-* 减少 CSS 样式的过度使用，尽量使用预置的样式类或缩写，尤其不要使用选择器。追求细节的视觉效果并非 路明 的长项，用户应当考虑 Sketch、Figma 等专业设计工具来进行视觉设计。
+* Minimize the excessive use of CSS styles; try to use preset style classes or abbreviations, and especially avoid using selectors. Pursuing detailed visual effects is not **Luming**'s strength; users should consider professional design tools like Sketch or Figma for visual design.
 
-# 语法 v0.2
+# Syntax v0.2
 
 ![TODO](./img/todo.svg) 
 
-添加图片语法和主体内文本语法。
+Add syntax for images and inner text of entities.
 
-# 语法 v0.3
+# Syntax v0.3
 
 ![TODO](./img/todo.svg)
 
-添加条件显示语法。
+Add conditional display syntax.
 
-# 使用
+# Usage
 
-<span style='color: #ffb464; font-weight: bold;'>路明</span> 提供了命令行工具来将自身的文本描述编译为可视化预览或结构化的前端代码组件。为了满足不同场景，路明 提供了预览模式和生成模式两种调用方法:
+<span style='color: #ffb464; font-weight: bold;'>**Luming**</span> provides a command-line tool to compile its textual descriptions into visual previews or structured front-end code components. To cater to different scenarios, **Luming** offers two invocation methods: Preview Mode and Generate Mode.
 
-## 预览模式：
+## Preview Mode
 
-在预览模式下，路明 会尽可能生成单一的 html 文档，在一个文档内嵌入入所有的 html css js 内容，以便被其它工具或浏览器直接渲染。在这个模式下，路明 会自动为每个主体添加一些基础的样式，以确保它们在视觉上是可见的，并且能够清晰地展示它们之间的层级关系。这些基础样式包括：
+In preview mode, **Luming** will generate a single HTML document as much as possible, embedding all HTML, CSS, and JavaScript content within one file, so it can be directly rendered by browsers or other tools. In this mode, **Luming** automatically adds some basic styles to each entity to ensure they are visually discernible and clearly demonstrate the hierarchical relationships between them. These basic styles include:
 
-- **边框**：每个主体都有一个默认的边框，以便在预览中清晰地看到主体的边界。
-- **层次与边框颜色**：不同层级的主体会分配不同的边框颜色，以帮助区分它们之间的层级关系。
-- **内外边距**：主体会有一些默认的内外边距，以确保内容不会紧贴边框。
-- **主体名称**：每个主体的名称会显示在主体内部，以便在预览中识别它们。
+* **Borders**: Each entity has a default border, making its boundaries clearly visible in the preview.
 
-当你显式地指定样式时，这些基础样式会被覆盖。例如，如果你为一个主体设置了 `border: none`，它将不再显示边框。或者如果你为一个主体设置了特定的背景色或边框颜色，这些样式将覆盖默认的样式。
+* **Hierarchy & Border Colors**: Entities at different hierarchical levels are assigned different border colors to help distinguish their relationships.
 
-## 生成模式
+* **Margins & Padding**: Entities have some default margins and padding to ensure content doesn't stick to the borders.
 
-在生成模式下，路明 会为每个主体单独生成一个文件，并且只包含你显式指定的样式属性，和必要的布局属性。通过参数控制，你可以选择生成 Vue、React 或其他框架的组件代码。多个组件之间的关系会通过 import 语句或其他方式进行连接，以确保它们能够正确地组合成一个完整的界面。
+* **Entity Names**: The name of each entity is displayed inside it for easy identification in the preview.
 
-在生成模式下，路明只会生成你显式指定的样式，而不会包含任何默认的样式。这意味着如果你没有为主体指定任何样式，生成的代码将不会包含任何样式属性。但布局必须的 CSS 属性（如 `display: flex`、`flex-direction` 等）会被自动添加，以确保主体的布局关系正确。
+When you explicitly specify styles, these basic styles are overridden. For example, if you set `border: none` for an entity, its border will no longer be displayed. Or if you set a specific background color or border color for an entity, those styles will override the defaults.
 
-_要注意的是，用户可以使用 路明 写出复杂的界面结构，但由于 路明 生成模式会为每一个组件生成一个独立的文件，一个复杂结构可能会生成大量的文件，需要合理组织和管理。_
+## Generate Mode
 
-## 生成时转换：
+In generate mode, **Luming** creates a separate file for each entity, containing only the style attributes you explicitly specified and the necessary layout attributes. This means if you don't specify any styles for an entity, the generated code will contain no style attributes. However, essential CSS properties for layout (like `display: flex`, `flex-direction`, etc.) are automatically added to ensure the entity's layout relationships are correct.
 
-由于 html 本身存在的限制， 路明 在编译生成组件文件时会对一些特殊的组件名称进行转换。例如，如果你定义了一个主体名称为 `Header`，在编译时它可能会被转换为 `MyHeader` 或其他名称，以避免与 HTML 中的 `<header>` 标签冲突。这些转换规则可以通过配置文件进行调整，以满足不同项目的需求。 路明 不会使用随机字符串来生成组件名称，而是会根据预定义的规则进行转换，以确保生成的组件名称具有一定的可读性和一致性。在复杂工程中， 路明 自动转换后的组件名称仍有可能会与现有的组件名称发生冲突，建议在这种情况下手动调整配置。
+Through parameter control, you can choose to generate component code for Vue, React, or other frameworks. Relationships between multiple components are connected via import statements or other means to ensure they can be correctly combined into a complete interface.
 
-## Markdown 集成
+Note: Users can write complex interface structures using **Luming**, but since **Luming**'s generate mode creates a separate file for each component, a complex structure might generate a large number of files, requiring proper organization and management.
+
+## Generation-Time Transformation:
+
+Due to limitations inherent in HTML, **Luming** transforms certain specific component names when compiling and generating component files. For example, if you define an entity named `Header`, it might be transformed to `MyHeader` or another name during compilation to avoid conflicts with HTML's `<header>` tag. These transformation rules can be adjusted via configuration files to meet the needs of different projects. **Luming** does not use random strings for component names; it transforms them according to predefined rules to ensure the generated component names have a degree of readability and consistency. In complex projects, there is still a possibility that **Luming**'s automatically transformed component names might conflict with existing component names; it is recommended to manually adjust the configuration in such cases.
+
+## Markdown Integration
 
 ![TODO](./img/todo.svg)
 
 <pre>
-&grave;&grave;&grave;luming<br>
+&grave;&grave;&grave;**Luming**<br>
 Header / Sidebar + Main [ Tabs / Content [Form / Preview]] / Footer<br>
 &grave;&grave;&grave;
 </pre>
 
 
-# 关于
+# About
 
- <span style='color: #ffb464; font-weight: bold;'>路明（Luming）</span> 的名字本身带有隐喻：英文 Luming 可以理解为 Luminous（发光），中文 <span style='color: #ffb464; font-weight: bold;'>路明</span> 则象征光亮的路径和清晰的线路，愿光明照亮前行的道路。路明 以文本勾勒界面结构的轮廓，为设计者提供一种“可视化的思维线路”。它不是精细美学的替代品，而是辅助工具——让创意、结构和代码之间的桥梁更加轻量、高效且易于理解。
+<span style='color: #ffb464; font-weight: bold;'>**Luming** (路明)</span> the name itself carries a metaphor: The English word "**Luming**" can be understood as Luminous, while the Chinese characters <span style='color: #ffb464; font-weight: bold;'>路明</span> (Lù Míng) symbolize a bright roadway and a clear route,  wishing for light to illuminate your way forward. **Luming** outlines the contours of interface structures with text, providing designers with a kind of "visual thinking line." It is not a substitute for fine aesthetics, but an auxiliary tool — making the bridge between ideas, structure, and code lighter, more efficient, and easier to understand.
