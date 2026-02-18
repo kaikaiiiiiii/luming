@@ -2,6 +2,8 @@
 
 [简体中文](./README.zh-CN.md) | [English](./README.md)
 
+> **This CLI tool is AI-generated and untested. Do not use it on existing projects, feel free to test it in new/experimental ones.**
+
 <span style='color: #ffb464; font-weight: bold;'>**Luming**</span> is a textual language and accompanying implementation tool used to describe static page structures. Its core goal is **to provide a simplified, readable textual expression for webpage interface structures.**
 
 ## Why Luming?

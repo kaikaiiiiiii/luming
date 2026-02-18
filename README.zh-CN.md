@@ -2,6 +2,8 @@
 
 [简体中文](./README.zh-CN.md) | [English](./README.md)
 
+> **CLI 工具由 AI 自动生成且未经验证。请勿用于现有项目，可在新项目中测试使用。**
+
 <span style='color: #ffb464; font-weight: bold;'>**路明（Luming）**</span> 是一种用于描述静态页面结构的文本语言和配套实现工具。它的核心目标是提供一种 **简化、可读的界面结构表达语言**。
 
 ## Why Luming?
