@@ -6,6 +6,7 @@ import {
     ExpressionNode,
     RuntimeNode,
     RuntimeLayoutNode,
+    StructureStatement,
 } from "./types";
 
 function collectContainedEntities(expr: ExpressionNode, out: Set<string>): void {
@@ -198,12 +199,29 @@ export function compile(
     );
 
     if (structureStatements.length > 0) {
-        compileResult.scenes = structureStatements.map((statement) =>
-            expandLayout(statement.expression, compileResult, [], sequence, false)
-        );
-        compileResult.roots = compileResult.scenes.flatMap((scene) =>
-            layoutToRootEntities(scene)
-        );
+        // Slot model (README「语法 v0.1 - 高阶用法」): structure lines are grouped by
+        // their first entity (the slot owner); the LAST line starting with the same
+        // entity overrides earlier ones. All lines are read first, then merged, then
+        // expanded once (no line-by-line rendering).
+        const finalBySlot = new Map<string, StructureStatement>();
+        for (const statement of structureStatements) {
+            finalBySlot.set(statement.slotEntity, statement);
+        }
+
+        // Entities contained inside any [] are only rendered at their containment
+        // positions, never as standalone scenes (README「进一步了解 - 副本生成」).
+        const contained = new Set<string>();
+        for (const statement of finalBySlot.values()) {
+            collectContainedEntities(statement.expression, contained);
+        }
+
+        const scenes = [...finalBySlot.values()]
+            .filter((statement) => !contained.has(statement.slotEntity))
+            .map((statement) =>
+                expandLayout(statement.expression, compileResult, [], sequence, false)
+            );
+        compileResult.scenes = scenes;
+        compileResult.roots = scenes.flatMap((scene) => layoutToRootEntities(scene));
         return compileResult;
     }
 

@@ -36,6 +36,8 @@ export interface StructureStatement {
     raw: string;
     topLevelEntities: string[];
     expression: ExpressionNode;
+    /** First entity in pre-order; structure lines are grouped by this slot and later lines override earlier ones. */
+    slotEntity: string;
 }
 
 export interface StyleStatement {
@@ -99,6 +101,14 @@ export interface CompileResult {
 }
 
 export type GenerateFramework = "html" | "vue" | "react";
+
+/** Generation-time name transformation config (README「使用 - 生成时转换」). */
+export interface GeneratorConfig {
+    /** Explicit per-entity renames, e.g. { "Header": "SiteHeader" }. Takes priority. */
+    componentRename?: Record<string, string>;
+    /** Prefix applied to reserved HTML tag names (default "My", e.g. Header -> MyHeader). */
+    reservedPrefix?: string;
+}
 
 export interface GenerateOptions {
     framework: GenerateFramework;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Form } from './Form';
+import { MyForm } from './MyForm';
 import { Preview } from './Preview';
 
 export function Content() {
@@ -8,9 +8,9 @@ export function Content() {
 
     }}>
       <div style="display:flex; flex-direction:column; gap:8px;">
-      <Form />
+      <MyForm />
       <Preview />
-    </Div>
+    </div>
     </section>
   );
 }

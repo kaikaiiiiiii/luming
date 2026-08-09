@@ -2,20 +2,40 @@
 
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { compile, generateFiles, GenerateFramework, renderPreviewHtml } from "./src";
+import { compile, generateFiles, GenerateFramework, GeneratorConfig, renderPreviewHtml } from "./src";
 
 type ParsedArgs = {
     command: "preview" | "generate" | "help";
     inputFile?: string;
     output?: string;
     framework: GenerateFramework;
+    configPath?: string;
 };
 
 function printHelp(): void {
     process.stdout.write(`Luming CLI\n\n`);
     process.stdout.write(`Usage:\n`);
     process.stdout.write(`  luming preview <input.luming> [-o output.html]\n`);
-    process.stdout.write(`  luming generate <input.luming> [-o outdir] [--framework html|vue|react]\n\n`);
+    process.stdout.write(`  luming generate <input.luming> [-o outdir] [--framework html|vue|react] [--config path]\n\n`);
+}
+
+/** Load the generator config (README「使用 - 生成时转换」): explicit --config path or luming.config.json in cwd. */
+function loadConfig(configPath?: string): GeneratorConfig {
+    const candidates = configPath
+        ? [configPath]
+        : ["luming.config.json"];
+    for (const candidate of candidates) {
+        const abs = path.resolve(process.cwd(), candidate);
+        if (!fs.existsSync(abs)) {
+            continue;
+        }
+        try {
+            return JSON.parse(fs.readFileSync(abs, "utf8")) as GeneratorConfig;
+        } catch (error) {
+            throw new Error(`Invalid config file: ${candidate}`);
+        }
+    }
+    return {};
 }
 
 function parseArgs(argv: string[]): ParsedArgs {
@@ -31,6 +51,7 @@ function parseArgs(argv: string[]): ParsedArgs {
     let inputFile: string | undefined;
     let output: string | undefined;
     let framework: GenerateFramework = "html";
+    let configPath: string | undefined;
 
     for (let i = 0; i < rest.length; i += 1) {
         const arg = rest[i];
@@ -48,6 +69,11 @@ function parseArgs(argv: string[]): ParsedArgs {
             i += 1;
             continue;
         }
+        if (arg === "-c" || arg === "--config") {
+            configPath = rest[i + 1];
+            i += 1;
+            continue;
+        }
         if (!inputFile) {
             inputFile = arg;
             continue;
@@ -59,6 +85,7 @@ function parseArgs(argv: string[]): ParsedArgs {
         inputFile,
         output,
         framework,
+        configPath,
     };
 }
 
@@ -92,11 +119,13 @@ function runPreview(inputPath: string, output?: string): void {
 function runGenerate(
     inputPath: string,
     output: string | undefined,
-    framework: GenerateFramework
+    framework: GenerateFramework,
+    configPath: string | undefined
 ): void {
     const source = fs.readFileSync(inputPath, "utf8");
     const result = compile(source, { mode: "generate" });
-    const files = generateFiles(result, framework);
+    const config = loadConfig(configPath);
+    const files = generateFiles(result, framework, config);
 
     const outDir = output
         ? path.resolve(process.cwd(), output)
@@ -129,7 +158,7 @@ function main(): void {
             return;
         }
 
-        runGenerate(inputPath, args.output, args.framework);
+        runGenerate(inputPath, args.output, args.framework, args.configPath);
     } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         process.stderr.write(`Error: ${message}\n`);

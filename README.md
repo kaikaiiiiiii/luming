@@ -33,6 +33,41 @@ Constraints:
 * Not a front-end framework
 * Not a dynamic templating language
 
+<style>
+    /* Shared styles for inline layout figures (SVG fidelity) */
+    div.lm-fig { display: inline-flex; vertical-align: bottom; margin-right: 6px; font-family: "Helvetica Neue", Arial, sans-serif; font-size: 13px; }
+    .lm-col { display: flex; flex-direction: column; gap: 6px; }
+    .lm-row { display: flex; flex-direction: row; gap: 6px; }
+    .lm-cell { border: 1px solid; border-radius: 4px; display: flex; align-items: center; justify-content: center; text-align: center; color: #000; }
+    .lm-a { background: #b9f9ff; border-color: #45c3ce; box-shadow: 0 0 10px 2px rgba(69, 195, 206, 0.5); }
+    .lm-b { background: #fffdc6; border-color: #ffca65; box-shadow: 0 0 10px 2px rgba(255, 202, 101, 0.8); }
+    .lm-c { background: #80ff80; border-color: #00e500; box-shadow: 0 0 10px 2px rgba(0, 143, 0, 0.5); }
+    .lm-bd { box-sizing: border-box; border: 1px solid #ffca65; background: #fffdc6; border-radius: 6px; padding: 8px; box-shadow: 0 0 10px 2px rgba(255, 202, 101, 0.8); }
+    .lm-layout { margin: 10px 0; }
+    .lm-w36 { width: 36px; }
+    .lm-w80 { width: 80px; }
+    .lm-h36 { height: 36px; }
+    .lm-h80 { height: 80px; }
+    /* Quick start preview figure (SVG fidelity) */
+    .lm-qk { box-sizing: border-box; font-family: "Helvetica Neue", Arial, sans-serif; font-size: 16px; display: flex; flex-direction: column; gap: 6px; width: 560px; padding: 6px; background: white; }
+    .lm-qk .entity { border: 1px solid #999; display: flex; align-items: center; justify-content: center; text-align: center; padding: 6px 10px; background: white; }
+    .lm-qk .header, .lm-qk .footer { border-color: #0096ff; box-shadow: 2px 2px 6px rgba(0, 150, 255, 0.5); height: 70px; }
+    .lm-qk .mid { display: flex; gap: 6px; }
+    .lm-qk .sidebar { border-color: #0096ff; box-shadow: 2px 2px 6px rgba(0, 150, 255, 0.5); width: 160px; }
+    .lm-qk .main { border-color: #ff9300; box-shadow: 2px 2px 6px rgba(255, 147, 0, 0.5); color: #ff9300; flex: 1; flex-direction: column; align-items: stretch; gap: 6px; padding: 6px; }
+    .lm-qk .tabs { display: flex; gap: 6px; }
+    .lm-qk .pill { flex: 1; height: 40px; border-radius: 20px; }
+    .lm-qk .t1 { background: #c0ffc0; border: 1px solid #009051; }
+    .lm-qk .t2 { background: #ffc0c0; border: 1px solid #ff0002; }
+    .lm-qk .t3 { background: #ffffc0; border: 1px solid #ff9300; }
+    .lm-qk .t4 { background: #c0ffff; border: 1px solid #0096ff; }
+    .lm-qk .t5 { background: #c0c0ff; border: 1px solid #011893; }
+    .lm-qk .content { border-color: #ff2600; box-shadow: 2px 2px 6px rgba(255, 38, 0, 0.8); color: #ff2600; flex: 1; display: flex; flex-direction: column; align-items: stretch; gap: 6px; padding: 6px; }
+    .lm-qk .form { border-color: #0096ff; box-shadow: 2px 2px 6px rgba(0, 150, 255, 0.5); border-radius: 6px; height: 120px; color: #333; }
+    .lm-qk .preview { border-color: #0096ff; box-shadow: 2px 2px 6px rgba(0, 150, 255, 0.5); height: 160px; color: #333; }
+    .lm-qk .main-label, .lm-qk .content-label { text-align: right; }
+</style>
+
 ## Quick Start
 
 ```text
@@ -45,7 +80,28 @@ Form: rd 4;
 ```
 The above text can be parsed by **Luming** into a visual interface preview:
 
-![](./img/quickstart.svg)
+<div class="lm-qk">
+    <div class="entity header">&lt; Header /&gt;</div>
+    <div class="mid">
+        <div class="entity sidebar">&lt; Sidebar /&gt;</div>
+        <div class="entity main">
+            <div class="tabs">
+                <div class="pill t1"></div>
+                <div class="pill t2"></div>
+                <div class="pill t3"></div>
+                <div class="pill t4"></div>
+                <div class="pill t5"></div>
+            </div>
+            <div class="content">
+                <div class="entity form">&lt; Form /&gt;</div>
+                <div class="entity preview">&lt; Preview /&gt;</div>
+                <div class="content-label">&lt; Content /&gt;</div>
+            </div>
+            <div class="main-label">&lt; Main /&gt;</div>
+        </div>
+    </div>
+    <div class="entity footer">&lt; Footer /&gt;</div>
+</div>
 
 Or further, to generate front-end code components:
 
@@ -74,12 +130,6 @@ import Footer from './components/Footer.vue';
 // Main.vue
 import Tabs from './Tabs.vue';
 import Content from './Content.vue';
-export default {
-  components: {
-    Tabs,
-    Content
-  }
-}
 </script>
 
 <template>
@@ -92,24 +142,37 @@ export default {
 
 ...
 ```
-Or directly generate prompts for AI models:
+Or directly generate a skill file in the project directory for vibe coding:
 
 ```text
-Please generate page layout code, including HTML and CSS, based on the following description:
-- The page consists of three parts from top to bottom: Header, tmp_123, Footer, arranged vertically.
-- tmp_123 consists of two parts: Sidebar and Main, arranged horizontally.
-- Main contains Tabs and Content, arranged vertically.
-- Content internally contains Form and Preview, arranged vertically.
-- Main has a background color of #fda and a width of 70%.
-- Tabs uses the 'label' style, with the specific style being ...
-- Form has a border radius of 4px.
+---
+name: luming
+description: Write, edit, and debug .luming DSL files. Luming is a textual DSL for describing static page structures.
+---
 
-Additional requirements include:
-- The generated code should use modern HTML5 and CSS3 standards.
-- The code should be well-readable and structured for easy maintenance and extension.
-- The generated CSS should be as concise as possible, avoiding redundant style definitions.
-- Each main entity I define (such as Header, Sidebar, Main, etc.) should be implemented as an independent module or component for reuse in actual projects.
-- The generated code should consider responsive design to adapt to different screen sizes and device types.
+# Luming DSL Core Syntax
+
+Entities are defined by names that start with a letter and may contain letters, numbers, and underscores.
+
+## Layout Operators
+- `/` — vertical stacking (A above B).
+- `+` — horizontal layout (A left of B).
+- `[]` — containment (B contains A and C: `B [ A / C ]`).
+- `()` — grouping / operator precedence (e.g. `A + (B / C)`).
+- Precedence: `[]` > `()` > `+` > `/`.
+
+## Styles
+- `Entity: bg #fda; 70;` — content between `:` and `;`; properties separated by `;`. Trailing `;` is optional at the end of a line.
+- Tokens: `bg <color>` (background-color), `rd <n>` (border-radius, px suffix auto-added), `tab` / `card` / `label` (preset class), a bare number or percent (width %), or `css-prop value` (e.g. `border 1px solid red`).
+
+## Compositional Syntax
+- The same entity may be defined across multiple lines; later definitions override earlier ones (styles merge per-property).
+- Same-name entities on one line are separate copies (e.g. `List [Item Item Item]`).
+- Implicit `+` inside `[]` is allowed when unambiguous: `A[B C]` == `A [ B + C ]`.
+
+## Rule Tolerance
+- Any number of spaces or tabs is treated as a single space; spaces around relationship operators are optional.
+- Circular inclusion is allowed but expanded finitely, stopping at a "terminus".
 ```
 
 In the quick example, we defined a page structure containing Header, Sidebar, Main, and Footer. Inside Main, there are Tabs and Content, and Content further contains Form and Preview. With concise syntax, we can clearly express the page's hierarchical relationships and layout.
@@ -124,7 +187,7 @@ Although **Luming** cannot directly generate complete design drafts or high-fide
 
 ## Entity Names
 
-* Entities are defined by names, which must start with a letter and can contain letters, numbers, and underscores. Multiple entities can be separated by spaces, newlines, or relationship operators. For example:
+* Entities are defined by names, which must start with a letter and can contain letters, numbers, and underscores (ASCII Latin letters only; Unicode characters such as CJK are not supported). Multiple entities can be separated by spaces, newlines, or relationship operators. For example:
 
   ```
   Part1
@@ -169,15 +232,15 @@ Although **Luming** cannot directly generate complete design drafts or high-fide
 
 ## Layout Relationship Expressions
 
-<img src='./img/AdB.svg' height="60" style="vertical-align: bottom;" > ：`A / B` means A is above B at the same hierarchical level. This is the most common arrangement in uncomposed HTML documents.
+<div class="lm-layout"><div class="lm-fig lm-col"><div class="lm-cell lm-a lm-w80 lm-h36">A</div><div class="lm-cell lm-b lm-w80 lm-h36">B</div></div> ：`A / B` means A is above B at the same hierarchical level. This is the most common arrangement in uncomposed HTML documents.</div>
 
-<img src='./img/A+B.svg' height="60" style="vertical-align: bottom;" > ：`A + B` means A and B are on the same level, with A to the left and B to the right.
+<div class="lm-layout"><div class="lm-fig lm-row"><div class="lm-cell lm-a lm-w36 lm-h80">A</div><div class="lm-cell lm-b lm-w36 lm-h80">B</div></div> ：`A + B` means A and B are on the same level, with A to the left and B to the right.</div>
 
-<img src='./img/BbAdCb.svg' height="60" style="vertical-align: bottom;" > ：`B [ A / C ]` means B is the container for A and C. `[]` indicates a containment relationship.
+<div class="lm-layout"><div class="lm-fig lm-bd lm-w80 lm-h80"><div class="lm-col" style="gap:8px;justify-content:center"><div class="lm-cell lm-a" style="box-sizing:border-box;width:64px;height:28px">A</div><div class="lm-cell lm-c" style="box-sizing:border-box;width:64px;height:28px">C</div></div></div> ：`B [ A / C ]` means B is the container for A and C. `[]` indicates a containment relationship.</div>
 
-<img src='./img/A+BdC.svg' height="60" style="vertical-align: bottom;" >：`A + B / C` means A is at the top-left, B at the top-right, and C is below A and B, all on the same hierarchical level.
+<div class="lm-layout"><div class="lm-fig lm-col"><div class="lm-row"><div class="lm-cell lm-a lm-w36 lm-h36">A</div><div class="lm-cell lm-b lm-w36 lm-h36">B</div></div><div class="lm-cell lm-c lm-w80 lm-h36">C</div></div>：`A + B / C` means A is at the top-left, B at the top-right, and C is below A and B, all on the same hierarchical level.</div>
 
-<img src='./img/A+cBdCc.svg' height="60" style="vertical-align: bottom;" >：`A + (B / C)` means A is on the left, B is at the top, and C is at the bottom-right, all on the same level. `()` indicates forcing priority within the same level. That is, B and C are grouped together first, then this group is arranged horizontally with A.
+<div class="lm-layout"><div class="lm-fig lm-row"><div class="lm-cell lm-a lm-w36 lm-h80">A</div><div class="lm-col"><div class="lm-cell lm-b lm-w36 lm-h36">B</div><div class="lm-cell lm-c lm-w36 lm-h36">C</div></div></div>：`A + (B / C)` means A is on the left, B is at the top, and C is at the bottom-right, all on the same level. `()` indicates forcing priority within the same level. That is, B and C are grouped together first, then this group is arranged horizontally with A.</div>
 
 Note: The `()` grouping symbol is a special one, implemented differently in various layout schemes. In flexbox layouts, or older in float layouts, an extra container element is needed to achieve the corresponding effect. In such cases, `()` is equivalent to an anonymous `[]`. For Grid layout, no extra container element is required; elements are arranged directly within the same level. According to **Luming**'s design philosophy, `()` is semantically defined as '**layout operation priority**' rather than directly mapping to an anonymous container or hierarchical relationship.
 
@@ -310,7 +373,7 @@ When subsequent lines contain the same entity name, **Luming** merges them into 
 
 **Code Composition**: During code generation, the generator will, based on input parameters, append relevant code corresponding to the specific mode when combining the generated entity copies.
 
-Therefore, **Luming**'s text parsing does not have a situation where 'a definition in a subsequent line overrides properties of a copy that already existed in a previous line'. This is because all copies are ultimately generated globally, not processed locally line by line in real-time.
+Therefore, **Luming**'s text parsing has no situation where 'a later-line definition overrides properties of a copy that already existed in an earlier line' — copy properties are not produced line by line at render time and then modified by later lines. **Luming** reads all lines first, merges the styles and hierarchy relations of entities, and only then generates all copies in a single pass. Later definitions overriding earlier ones happens only during this merge phase: styles merge per property (for the same property, the later one wins), and the hierarchy relation of a structure line starting with the same entity is determined by the last definition. Just as 'a person with no hair never has bed-head'.
 
 ## Rule Tolerance
 

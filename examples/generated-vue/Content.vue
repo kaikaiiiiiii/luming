@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import Form from './Form.vue';
+import MyForm from './MyForm.vue';
 import Preview from './Preview.vue';
 </script>
 
 <template>
   <section class="Content">
     <div style="display:flex; flex-direction:column; gap:8px;">
-      <Form />
+      <MyForm />
       <Preview />
-    </Div>
+    </div>
   </section>
 </template>
 

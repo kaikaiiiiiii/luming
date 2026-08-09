@@ -8,7 +8,7 @@ import Content from './Content.vue';
     <div style="display:flex; flex-direction:column; gap:8px;">
       <Tabs />
       <Content />
-    </Div>
+    </div>
   </section>
 </template>
 

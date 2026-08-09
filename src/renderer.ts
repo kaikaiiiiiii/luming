@@ -1,5 +1,12 @@
 import { CompileResult, RuntimeLayoutNode, RuntimeNode } from "./types";
 
+/** Per-hierarchy-level border colors (README「使用 - 预览模式 - 层次与边框颜色」). */
+const LEVEL_COLORS = ["#2563eb", "#7c3aed", "#059669", "#d97706", "#dc2626", "#0891b2"];
+
+function levelBorderColor(level: number): string {
+    return LEVEL_COLORS[level % LEVEL_COLORS.length];
+}
+
 function styleRecordToInline(styles: Record<string, string>): string {
     const entries = Object.entries(styles);
     if (entries.length === 0) {
@@ -20,7 +27,7 @@ function escapeHtml(value: string): string {
 function renderRuntimeEntity(node: RuntimeNode, level: number): string {
     const styles = {
         ...{
-            border: "1px solid #94a3b8",
+            border: `1px solid ${levelBorderColor(level)}`,
             padding: "8px",
             margin: "6px",
             "border-radius": "8px",

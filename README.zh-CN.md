@@ -2,7 +2,7 @@
 
 [简体中文](./README.zh-CN.md) | [English](./README.md)
 
-> **CLI 工具由 AI 自动生成且未经验证。请勿用于现有项目，可在新项目中测试使用。**
+> **CLI 工具由 AI 自动生成且未经验证。请勿用于实际开发。**
 
 <span style='color: #ffb464; font-weight: bold;'>**路明（Luming）**</span> 是一种用于描述静态页面结构的文本语言和配套实现工具。它的核心目标是提供一种 **简化、可读的界面结构表达语言**。
 
@@ -33,6 +33,41 @@
 * 不是前端框架
 * 不是动态模板语言
 
+<style>
+    /* 内联布局图共享样式（与 SVG 一致的观感） */
+    div.lm-fig { display: inline-flex; vertical-align: bottom; margin-right: 6px; font-family: "Helvetica Neue", Arial, sans-serif; font-size: 13px; }
+    .lm-col { display: flex; flex-direction: column; gap: 6px; }
+    .lm-row { display: flex; flex-direction: row; gap: 6px; }
+    .lm-cell { border: 1px solid; border-radius: 4px; display: flex; align-items: center; justify-content: center; text-align: center; color: #000; }
+    .lm-a { background: #b9f9ff; border-color: #45c3ce; box-shadow: 0 0 10px 2px rgba(69, 195, 206, 0.5); }
+    .lm-b { background: #fffdc6; border-color: #ffca65; box-shadow: 0 0 10px 2px rgba(255, 202, 101, 0.8); }
+    .lm-c { background: #80ff80; border-color: #00e500; box-shadow: 0 0 10px 2px rgba(0, 143, 0, 0.5); }
+    .lm-bd { box-sizing: border-box; border: 1px solid #ffca65; background: #fffdc6; border-radius: 6px; padding: 8px; box-shadow: 0 0 10px 2px rgba(255, 202, 101, 0.8); }
+    .lm-layout { margin: 10px 0; }
+    .lm-w36 { width: 36px; }
+    .lm-w80 { width: 80px; }
+    .lm-h36 { height: 36px; }
+    .lm-h80 { height: 80px; }
+    /* 快速开始预览图（与 SVG 一致的观感） */
+    .lm-qk { box-sizing: border-box; font-family: "Helvetica Neue", Arial, sans-serif; font-size: 16px; display: flex; flex-direction: column; gap: 6px; width: 560px; padding: 6px; background: white; }
+    .lm-qk .entity { border: 1px solid #999; display: flex; align-items: center; justify-content: center; text-align: center; padding: 6px 10px; background: white; }
+    .lm-qk .header, .lm-qk .footer { border-color: #0096ff; box-shadow: 2px 2px 6px rgba(0, 150, 255, 0.5); height: 70px; }
+    .lm-qk .mid { display: flex; gap: 6px; }
+    .lm-qk .sidebar { border-color: #0096ff; box-shadow: 2px 2px 6px rgba(0, 150, 255, 0.5); width: 160px; }
+    .lm-qk .main { border-color: #ff9300; box-shadow: 2px 2px 6px rgba(255, 147, 0, 0.5); color: #ff9300; flex: 1; flex-direction: column; align-items: stretch; gap: 6px; padding: 6px; }
+    .lm-qk .tabs { display: flex; gap: 6px; }
+    .lm-qk .pill { flex: 1; height: 40px; border-radius: 20px; }
+    .lm-qk .t1 { background: #c0ffc0; border: 1px solid #009051; }
+    .lm-qk .t2 { background: #ffc0c0; border: 1px solid #ff0002; }
+    .lm-qk .t3 { background: #ffffc0; border: 1px solid #ff9300; }
+    .lm-qk .t4 { background: #c0ffff; border: 1px solid #0096ff; }
+    .lm-qk .t5 { background: #c0c0ff; border: 1px solid #011893; }
+    .lm-qk .content { border-color: #ff2600; box-shadow: 2px 2px 6px rgba(255, 38, 0, 0.8); color: #ff2600; flex: 1; display: flex; flex-direction: column; align-items: stretch; gap: 6px; padding: 6px; }
+    .lm-qk .form { border-color: #0096ff; box-shadow: 2px 2px 6px rgba(0, 150, 255, 0.5); border-radius: 6px; height: 120px; color: #333; }
+    .lm-qk .preview { border-color: #0096ff; box-shadow: 2px 2px 6px rgba(0, 150, 255, 0.5); height: 160px; color: #333; }
+    .lm-qk .main-label, .lm-qk .content-label { text-align: right; }
+</style>
+
 ## 快速开始
 
 ```text
@@ -45,7 +80,28 @@ Form: rd 4;
 ```
 以上文本可以被 路明 解析为一个可视化的界面预览：
 
-![](./img/quickstart.svg)
+<div class="lm-qk">
+    <div class="entity header">&lt; Header /&gt;</div>
+    <div class="mid">
+        <div class="entity sidebar">&lt; Sidebar /&gt;</div>
+        <div class="entity main">
+            <div class="tabs">
+                <div class="pill t1"></div>
+                <div class="pill t2"></div>
+                <div class="pill t3"></div>
+                <div class="pill t4"></div>
+                <div class="pill t5"></div>
+            </div>
+            <div class="content">
+                <div class="entity form">&lt; Form /&gt;</div>
+                <div class="entity preview">&lt; Preview /&gt;</div>
+                <div class="content-label">&lt; Content /&gt;</div>
+            </div>
+            <div class="main-label">&lt; Main /&gt;</div>
+        </div>
+    </div>
+    <div class="entity footer">&lt; Footer /&gt;</div>
+</div>
 
 或者进一步生成前端代码组件：
 
@@ -74,12 +130,6 @@ import Footer from './components/Footer.vue';
 // Main.vue
 import Tabs from './Tabs.vue';
 import Content from './Content.vue';
-export default {
-  components: {
-    Tabs,
-    Content
-  }
-}
 </script>
 
 <template>
@@ -92,24 +142,30 @@ export default {
 
 ...
 ```
-或直接生成面向 AI 模型的提示词：
+或在项目目录下生成 skill 文件用于 vibe coding：
 
 ```text
-请根据以下描述生成页面布局代码，包括 HTML 和 CSS：
-- 页面从上到下依次为 Header、tmp_123、Footer 3部分，从上到下。
-- tmp_123 包括 Sidebar 、Main 2 部分，从左到右。
-- Main 包含 Tabs 和 Conten 2 部分，从上到下。
-- Content 内部包含 Form 和 Preview 2 部分，从上到下。
-- Main 的背景色为 #fda，宽度为 70%。
-- Tabs 的样式为 label，具体样式为 ......
-- Form 的圆角为 4px。
+---
+name: luming
+description: 编写、修改和调试 .luming DSL 文件。Luming 是用于描述静态页面结构的文本 DSL。
+---
 
-额外需求包括：
-- 生成的代码应使用现代的 HTML5 和 CSS3 标准。
-- 代码应具有良好的可读性和结构化，便于后续维护和扩展。
-- 生成的 CSS 应该尽可能简洁，避免冗余的样式定义。
-- 每个我定义的主体（如 Header、Sidebar、Main 等）都应该被实现为一个独立的模块或组件，以便在实际项目中进行复用。
-- 生成的代码应考虑响应式设计，以适应不同屏幕尺寸和设备类型。
+# Luming DSL 核心语法
+
+实体由名称定义，名称必须以字母开头，可包含字母、数字和下划线。
+
+## 布局运算符
+- `/` — 垂直堆叠（A 在 B 上方）。
+- `+` — 水平布局（A 在 B 左侧）。
+- `[]` — 包含关系（B 包含 A 和 C：`B [ A / C ]`）。
+- `()` — 分组 / 运算符优先级（例如 `A + (B / C)`）。
+- 优先级：`[]` > `()` > `+` > `/`。
+
+## 样式
+- `实体: bg #fda; 70;` — `:` 与 `;` 之间的内容为样式；属性用 `;` 分隔。行尾的 `;` 可省略。
+- 样式标记：`bg <颜色>`（背景色）、`rd <n>`（圆角，自动补 px 后缀）、`tab` / `card` / `label`（预设类）、裸数字或百分比（宽度 %）、或 `css属性 值`（如 `border 1px solid red`）。
+
+...
 ```
 
 在快速示例中，我们定义了一个包含 Header、Sidebar、Main 和 Footer 的页面结构。Main 内部包含 Tabs 和 Content，Content 又包含 Form 和 Preview。通过简洁的语法，我们可以清晰地表达页面的层级关系和布局方式。
@@ -124,7 +180,7 @@ export default {
 
 ## 主体名称
 
-* 主体通过名称定义，主体名称必须以字母开头，可以包含字母、数字和下划线。多个主体可以通过空格、换行或主体关系表达符分隔。例如：
+* 主体通过名称定义，主体名称必须以字母开头，可以包含字母、数字和下划线（仅支持 ASCII 拉丁字母，不支持中文等 Unicode 字符）。多个主体可以通过空格、换行或主体关系表达符分隔。例如：
 
   ```
   Part1
@@ -168,15 +224,15 @@ export default {
 
 ## 布局关系表达式：
 
-<img src='./img/AdB.svg' height="60" style="vertical-align: bottom;" > ：`A / B` 表示在同一层级，A 在上，B 在下。这是无排版的 HTML 文档中最常见的排列关系。  
+<div class="lm-layout"><div class="lm-fig lm-col"><div class="lm-cell lm-a lm-w80 lm-h36">A</div><div class="lm-cell lm-b lm-w80 lm-h36">B</div></div> ：`A / B` 表示在同一层级，A 在上，B 在下。这是无排版的 HTML 文档中最常见的排列关系。</div>
 
-<img src='./img/A+B.svg' height="60" style="vertical-align: bottom;" > ：`A + B` 表示 A 和 B 在同一层级，A 在左，B 在右。
+<div class="lm-layout"><div class="lm-fig lm-row"><div class="lm-cell lm-a lm-w36 lm-h80">A</div><div class="lm-cell lm-b lm-w36 lm-h80">B</div></div> ：`A + B` 表示 A 和 B 在同一层级，A 在左，B 在右。</div>
 
-<img src='./img/BbAdCb.svg' height="60" style="vertical-align: bottom;" > ：`B [ A / C ]` 表示 B 是 A、C 的容器。`[]` 表示包含关系。
+<div class="lm-layout"><div class="lm-fig lm-bd lm-w80 lm-h80"><div class="lm-col" style="gap:8px;justify-content:center"><div class="lm-cell lm-a" style="box-sizing:border-box;width:64px;height:28px">A</div><div class="lm-cell lm-c" style="box-sizing:border-box;width:64px;height:28px">C</div></div></div> ：`B [ A / C ]` 表示 B 是 A、C 的容器。`[]` 表示包含关系。</div>
 
-<img src='./img/A+BdC.svg' height="60" style="vertical-align: bottom;" >：`A + B / C` 表示 A 左上， B 右上， C 在 A B 的下方，三者同一层级。
+<div class="lm-layout"><div class="lm-fig lm-col"><div class="lm-row"><div class="lm-cell lm-a lm-w36 lm-h36">A</div><div class="lm-cell lm-b lm-w36 lm-h36">B</div></div><div class="lm-cell lm-c lm-w80 lm-h36">C</div></div>：`A + B / C` 表示 A 左上， B 右上， C 在 A B 的下方，三者同一层级。</div>
 
-<img src='./img/A+cBdCc.svg' height="60" style="vertical-align: bottom;" >：`A + (B / C)` 表示 A 在左，B 在上，C 右下，三者同一层级。**`()`** 表示在同层内，强制优先级处理。也就是说 BC 先合起来，再与 A 进行左右排列关系的处理。
+<div class="lm-layout"><div class="lm-fig lm-row"><div class="lm-cell lm-a lm-w36 lm-h80">A</div><div class="lm-col"><div class="lm-cell lm-b lm-w36 lm-h36">B</div><div class="lm-cell lm-c lm-w36 lm-h36">C</div></div></div>：`A + (B / C)` 表示 A 在左，B 在上，C 右下，三者同一层级。**`()`** 表示在同层内，强制优先级处理。也就是说 BC 先合起来，再与 A 进行左右排列关系的处理。</div>
 
 注： `()` 分组符是一个特殊的符号，在不同的布局方案中它有不同的实现方式。在 flex 或更早的 float 布局中，需要借助一个容器元素才能实现对应效果。这种情况下 `()` 等效于一个匿名的 `[]`，对于 Grid 布局来说，则不需要额外的容器元素，而是直接在同一层级内调整元素的排列方式。根据 路明 的设计哲学，`()` 在语义上被定义为『布局运算优先级』而非直接映射为匿名容器或层级关系。
 
@@ -308,7 +364,7 @@ H / L + R [ T / V ]: bg #fda; 70;/F
 
 **代码组合**：在生成代码的过程中，生成器会根据输入参数，在生成主体副本组合时，额外附加对应模式的相关代码。
 
-因此，路明 的文本解析不存在『后继行的定义覆盖前面行中已经存在的副本属性』的情况。因为所有副本都是在全局范围最后生成的，而不是在行内实时局部处理的。
+因此，路明 的文本解析不存在『后继行的定义覆盖前面行中已经存在的副本属性』的情况——副本属性并不是逐行渲染时实时产生、再被后续行修改的。路明 会先把所有行全部读入，合并主体的样式与层级关系，全部合并完成后才一次性生成副本。后定义覆盖前定义只发生在合并阶段：样式按属性合并（同名属性后者覆盖前者），层级关系以同一主体开头的结构行中最后定义的一行为准。正如『没有头发的人，不存在睡乱头发的问题』。
 
 ## 规则宽容
 

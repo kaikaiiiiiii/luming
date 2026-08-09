@@ -280,6 +280,14 @@ function topLevelEntities(expression: ExpressionNode): string[] {
     return expression.children.flatMap((child) => topLevelEntities(child));
 }
 
+/** First entity in pre-order; the slot owner of a structure line. */
+function firstEntity(expression: ExpressionNode): string {
+    if (expression.kind === "entity" || expression.kind === "container") {
+        return expression.name;
+    }
+    return firstEntity(expression.children[0]);
+}
+
 function updateTemplatesByExpression(
     expression: ExpressionNode,
     lineNumber: number,
@@ -334,7 +342,9 @@ function parseStyleLine(
             });
             continue;
         }
-        template.styles[resolved.key] = resolved.value;
+        for (const item of resolved) {
+            template.styles[item.key] = item.value;
+        }
     }
 
     return {
@@ -418,7 +428,9 @@ function parseStructureLine(
                 });
                 continue;
             }
-            template.styles[resolved.key] = resolved.value;
+            for (const item of resolved) {
+                template.styles[item.key] = item.value;
+            }
         }
     }
 
@@ -446,6 +458,7 @@ function parseStructureLine(
             raw: lineText,
             topLevelEntities: topLevelEntities(expression),
             expression,
+            slotEntity: firstEntity(expression),
         };
     } catch (error) {
         diagnostics.push({
