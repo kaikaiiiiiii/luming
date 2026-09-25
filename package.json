@@ -22,6 +22,7 @@
         "preview": "node dist/cli.js preview",
         "generate": "node dist/cli.js generate",
         "playground": "node scripts/build-playground.js",
+        "deploy": "node scripts/deploy-gh-pages.js",
         "test": "node tests/semantics-matrix.js"
     },
     "devDependencies": {

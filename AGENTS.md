@@ -26,6 +26,8 @@ npm run clean       # 删除 dist/
 npm run preview     # node dist/cli.js preview
 npm run generate    # node dist/cli.js generate
 npm run playground  # 由模板 + dist 模块重新生成单文件 playground.html
+npm run deploy      # 校验工作区干净 -> 重建 -> 将 playground.html 同步为 gh-pages 的 index.html 并推送
+npm test            # 运行 tests/semantics-matrix.js（16 项语义验收矩阵，需先 npm run build）
 ```
 
 CLI 用法（构建后）：
@@ -60,6 +62,19 @@ ChagGPT-Luming_Lang_Design_Discuss.md # 本项目最初的需求、创意与头�
 
 处理流水线：`parse` -> `compile` -> `renderPreviewHtml` 或 `generateFiles`。
 每个阶段都是基于 `src/types.ts` 中类型的纯函数。
+
+## gh-pages 在线预览（部署约定）
+
+- `gh-pages` 分支 = GitHub Pages 站点，根目录仅一个 `index.html`（由 `playground.html`
+  复制而来）。访问地址：`https://kaikaiiiiiii.github.io/luming/`（Pages 源 = gh-pages
+  分支 / 根目录，需在仓库 Settings → Pages 中开启一次）。
+- **每次语法更新或实质性改进后必须同步部署**，流程：
+  1. `npm run build && npm test && npm run playground`；
+  2. 提交 master（确保重建后的 `playground.html` 已入库）；
+  3. `npm run deploy` —— 脚本会校验工作区干净、重建 playground，并用 `git worktree`
+     在临时目录 `.gh-pages-tmp` 中把 `index.html` 提交到 gh-pages 分支后推送。
+- 部署脚本要求 master 工作区干净且重建无差异（保证线上与仓库严格一致）；
+  若脚本报"rebuild changed files that are not committed"，先提交重建产物再部署。
 
 ## 代码约定
 
