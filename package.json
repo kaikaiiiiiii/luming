@@ -20,7 +20,9 @@
         "clean": "rm -rf dist",
         "typecheck": "tsc -p tsconfig.json --noEmit",
         "preview": "node dist/cli.js preview",
-        "generate": "node dist/cli.js generate"
+        "generate": "node dist/cli.js generate",
+        "playground": "node scripts/build-playground.js",
+        "test": "node tests/semantics-matrix.js"
     },
     "devDependencies": {
         "@types/node": "^22.13.10",

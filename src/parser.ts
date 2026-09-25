@@ -1,22 +1,31 @@
 import { resolveStyleToken } from "./style";
 import {
     Diagnostic,
+    EntityExpr,
     ExpressionNode,
     GroupExpr,
     ParsedDocument,
     ParsedStatement,
-    StyleStatement,
     StructureStatement,
+    StylePair,
+    StyleStatement,
     TemplateDefinition,
 } from "./types";
 
 type TokenType = "name" | "plus" | "slash" | "lbracket" | "rbracket" | "lparen" | "rparen";
 
-type Token = {
+interface Token {
     type: TokenType;
     value: string;
     index: number;
-};
+    inlineStyles?: StylePair[];
+}
+
+const STRUCTURE_CHARS = new Set(["+", "/", "[", "]", "(", ")"]);
+const NAME_START_RE = /^[A-Za-z]$/;
+const NAME_CHAR_RE = /^[A-Za-z0-9_]$/;
+const BARE_NAME_RE = /^[A-Za-z][A-Za-z0-9_]*$/;
+const LEADING_ANCHOR_RE = /^([A-Za-z][A-Za-z0-9_]*)\s*:\s*/;
 
 class ExpressionParser {
     private readonly tokens: Token[];
@@ -86,6 +95,7 @@ class ExpressionParser {
                 kind: "container",
                 name: node.name,
                 content,
+                inlineStyles: node.inlineStyles,
             };
         }
 
@@ -100,7 +110,11 @@ class ExpressionParser {
 
         if (token.type === "name") {
             this.index += 1;
-            return { kind: "entity", name: token.value };
+            const entity: EntityExpr = { kind: "entity", name: token.value };
+            if (token.inlineStyles && token.inlineStyles.length > 0) {
+                entity.inlineStyles = token.inlineStyles;
+            }
+            return entity;
         }
 
         if (token.type === "lparen") {
@@ -154,9 +168,8 @@ function ensureTemplate(
     const created: TemplateDefinition = {
         name,
         firstDefinedLine: line,
-        defaultChildren: [],
+        interiorDeclarations: [],
         styles: {},
-        contentExpression: null,
     };
     templates[name] = created;
     templateOrder.push(name);
@@ -177,16 +190,82 @@ function collapseGroup(direction: "row" | "column", nodes: ExpressionNode[]): Ex
         }
     }
 
-    const group: GroupExpr = {
-        kind: "group",
-        direction,
-        children: flattened,
-    };
-
-    return group;
+    return { kind: "group", direction, children: flattened };
 }
 
-function tokenizeStructure(input: string): Token[] {
+/**
+ * Scan a style chunk starting right after a `name:` anchor. The chunk ends at a
+ * structure character, at end of line, or at a `;` whose following segment (up to
+ * the next structure char / `;` / EOL) consists solely of bare entity names — that
+ * `;` is the boundary between the style block and sibling entities
+ * (e.g. `Item: bg #99f; Item Item`).
+ */
+function scanStyleChunk(source: string, start: number): { tokens: string[]; end: number } {
+    let index = start;
+    while (index < source.length) {
+        const char = source[index];
+        if (STRUCTURE_CHARS.has(char)) {
+            break;
+        }
+        if (char === ";") {
+            let cursor = index + 1;
+            while (cursor < source.length && /\s/.test(source[cursor])) {
+                cursor += 1;
+            }
+            let segmentEnd = cursor;
+            while (
+                segmentEnd < source.length &&
+                !STRUCTURE_CHARS.has(source[segmentEnd]) &&
+                source[segmentEnd] !== ";"
+            ) {
+                segmentEnd += 1;
+            }
+            const words = source.slice(cursor, segmentEnd).trim().split(/\s+/).filter(Boolean);
+            const allBareNames = words.length > 0 && words.every((word) => BARE_NAME_RE.test(word));
+            if (allBareNames) {
+                return { tokens: splitStyleTokens(source.slice(start, index)), end: index + 1 };
+            }
+        }
+        index += 1;
+    }
+    return { tokens: splitStyleTokens(source.slice(start, index)), end: index };
+}
+
+function splitStyleTokens(chunk: string): string[] {
+    return chunk
+        .split(";")
+        .map((item) => item.trim())
+        .filter(Boolean);
+}
+
+function resolveInlineStyles(
+    tokens: string[],
+    lineNumber: number,
+    diagnostics: Diagnostic[]
+): StylePair[] {
+    const pairs: StylePair[] = [];
+    for (const token of tokens) {
+        const resolved = resolveStyleToken(token);
+        if (!resolved) {
+            diagnostics.push({
+                level: "warning",
+                line: lineNumber,
+                message: `Unsupported style token: ${token}`,
+            });
+            continue;
+        }
+        for (const item of resolved) {
+            pairs.push({ key: item.key, value: item.value });
+        }
+    }
+    return pairs;
+}
+
+function tokenizeStructure(
+    input: string,
+    lineNumber: number,
+    diagnostics: Diagnostic[]
+): Token[] {
     const tokens: Token[] = [];
     let index = 0;
 
@@ -233,17 +312,32 @@ function tokenizeStructure(input: string): Token[] {
             continue;
         }
 
-        if (/[A-Za-z]/.test(char)) {
+        if (NAME_START_RE.test(char)) {
             const start = index;
             index += 1;
-            while (index < input.length && /[A-Za-z0-9_]/.test(input[index])) {
+            while (index < input.length && NAME_CHAR_RE.test(input[index])) {
                 index += 1;
             }
-            tokens.push({
-                type: "name",
-                value: input.slice(start, index),
-                index: start,
-            });
+            const value = input.slice(start, index);
+
+            // Inline style anchor: `Name: tokens` (optional spaces before the colon).
+            let probe = index;
+            while (probe < input.length && /\s/.test(input[probe])) {
+                probe += 1;
+            }
+            if (input[probe] === ":") {
+                const { tokens: styleTokens, end } = scanStyleChunk(input, probe + 1);
+                tokens.push({
+                    type: "name",
+                    value,
+                    index: start,
+                    inlineStyles: resolveInlineStyles(styleTokens, lineNumber, diagnostics),
+                });
+                index = end;
+                continue;
+            }
+
+            tokens.push({ type: "name", value, index: start });
             continue;
         }
 
@@ -280,17 +374,10 @@ function topLevelEntities(expression: ExpressionNode): string[] {
     return expression.children.flatMap((child) => topLevelEntities(child));
 }
 
-/** First entity in pre-order; the slot owner of a structure line. */
-function firstEntity(expression: ExpressionNode): string {
-    if (expression.kind === "entity" || expression.kind === "container") {
-        return expression.name;
-    }
-    return firstEntity(expression.children[0]);
-}
-
-function updateTemplatesByExpression(
+function recordDeclarations(
     expression: ExpressionNode,
     lineNumber: number,
+    order: { value: number },
     templates: Record<string, TemplateDefinition>,
     templateOrder: string[]
 ): void {
@@ -301,150 +388,34 @@ function updateTemplatesByExpression(
 
     if (expression.kind === "container") {
         const template = ensureTemplate(templates, templateOrder, expression.name, lineNumber);
-        template.contentExpression = expression.content;
-        template.defaultChildren = topLevelEntities(expression.content);
-        updateTemplatesByExpression(expression.content, lineNumber, templates, templateOrder);
+        template.interiorDeclarations.push({
+            line: lineNumber,
+            order: order.value++,
+            content: expression.content,
+        });
+        recordDeclarations(expression.content, lineNumber, order, templates, templateOrder);
         return;
     }
 
     for (const child of expression.children) {
-        updateTemplatesByExpression(child, lineNumber, templates, templateOrder);
+        recordDeclarations(child, lineNumber, order, templates, templateOrder);
     }
-}
-
-function parseStyleLine(
-    lineText: string,
-    lineNumber: number,
-    templates: Record<string, TemplateDefinition>,
-    templateOrder: string[],
-    diagnostics: Diagnostic[]
-): StyleStatement | null {
-    const matched = /^([A-Za-z][A-Za-z0-9_]*)\s*:\s*(.*)$/.exec(lineText);
-    if (!matched) {
-        return null;
-    }
-
-    const entity = matched[1];
-    const body = matched[2].trim();
-    const tokens = body
-        .split(";")
-        .map((item) => item.trim())
-        .filter(Boolean);
-
-    const template = ensureTemplate(templates, templateOrder, entity, lineNumber);
-    for (const token of tokens) {
-        const resolved = resolveStyleToken(token);
-        if (!resolved) {
-            diagnostics.push({
-                level: "warning",
-                line: lineNumber,
-                message: `Unsupported style token: ${token}`,
-            });
-            continue;
-        }
-        for (const item of resolved) {
-            template.styles[item.key] = item.value;
-        }
-    }
-
-    return {
-        kind: "style",
-        line: lineNumber,
-        raw: lineText,
-        entity,
-        tokens,
-    };
-}
-
-type InlineStyleExtraction = {
-    structure: string;
-    inlineStyles: Array<{ entity: string; tokens: string[] }>;
-};
-
-function extractInlineStyles(rawLine: string): InlineStyleExtraction {
-    let structure = "";
-    const inlineStyles: Array<{ entity: string; tokens: string[] }> = [];
-
-    let index = 0;
-    while (index < rawLine.length) {
-        const segment = rawLine.slice(index);
-        const styleAnchor = /(^|[^A-Za-z0-9_])([A-Za-z][A-Za-z0-9_]*)\s*:\s*/.exec(segment);
-        if (!styleAnchor || styleAnchor.index === undefined) {
-            structure += segment;
-            break;
-        }
-
-        const fullStart = index + styleAnchor.index;
-        const prefixLength = styleAnchor[1]?.length ?? 0;
-        const entity = styleAnchor[2];
-        const entityStart = fullStart + prefixLength;
-        const styleStart = entityStart + entity.length + segment.slice(styleAnchor.index + prefixLength + entity.length).indexOf(":") + 1;
-
-        structure += rawLine.slice(index, styleStart - 1);
-
-        let j = styleStart;
-        while (j < rawLine.length) {
-            const c = rawLine[j];
-            if (c === "/" || c === "+" || c === "[" || c === "]" || c === "(" || c === ")") {
-                break;
-            }
-            j += 1;
-        }
-
-        const styleChunk = rawLine.slice(styleStart, j).trim();
-        const tokens = styleChunk
-            .split(";")
-            .map((item) => item.trim())
-            .filter(Boolean);
-        if (tokens.length > 0) {
-            inlineStyles.push({ entity, tokens });
-        }
-
-        index = j;
-    }
-
-    return { structure: structure.trim(), inlineStyles };
 }
 
 function parseStructureLine(
-    lineText: string,
+    structurePart: string,
     lineNumber: number,
     templates: Record<string, TemplateDefinition>,
     templateOrder: string[],
     diagnostics: Diagnostic[]
 ): StructureStatement | null {
-    const extracted = extractInlineStyles(lineText);
-    const structureRaw = extracted.structure;
-
-    for (const inline of extracted.inlineStyles) {
-        const template = ensureTemplate(templates, templateOrder, inline.entity, lineNumber);
-        for (const token of inline.tokens) {
-            const resolved = resolveStyleToken(token);
-            if (!resolved) {
-                diagnostics.push({
-                    level: "warning",
-                    line: lineNumber,
-                    message: `Unsupported style token: ${token}`,
-                });
-                continue;
-            }
-            for (const item of resolved) {
-                template.styles[item.key] = item.value;
-            }
-        }
-    }
-
-    if (!structureRaw) {
-        return null;
-    }
-
     try {
-        const tokens = tokenizeStructure(structureRaw);
+        const tokens = tokenizeStructure(structurePart, lineNumber, diagnostics);
         if (tokens.length === 0) {
             return null;
         }
         const expression = new ExpressionParser(tokens).parseRoot();
-        updateTemplatesByExpression(expression, lineNumber, templates, templateOrder);
+        recordDeclarations(expression, lineNumber, { value: 0 }, templates, templateOrder);
 
         const names = new Set<string>();
         collectEntityNames(expression, names);
@@ -455,10 +426,9 @@ function parseStructureLine(
         return {
             kind: "structure",
             line: lineNumber,
-            raw: lineText,
+            raw: structurePart,
             topLevelEntities: topLevelEntities(expression),
             expression,
-            slotEntity: firstEntity(expression),
         };
     } catch (error) {
         diagnostics.push({
@@ -484,29 +454,72 @@ export function parse(source: string): ParsedDocument {
             return;
         }
 
-        const style = parseStyleLine(
-            line,
-            lineNumber,
-            templates,
-            templateOrder,
-            diagnostics
-        );
-        if (style) {
-            statements.push(style);
-            return;
+        // Leading `Name:` anchor = an entity-level style declaration; whatever
+        // follows it (if anything) is a structure expression on the same line.
+        const leadingAnchor = LEADING_ANCHOR_RE.exec(line);
+        let structurePart = line;
+        if (leadingAnchor) {
+            const name = leadingAnchor[1];
+            const { tokens, end } = scanStyleChunk(line, leadingAnchor[0].length);
+            const template = ensureTemplate(templates, templateOrder, name, lineNumber);
+            for (const token of tokens) {
+                const resolved = resolveStyleToken(token);
+                if (!resolved) {
+                    diagnostics.push({
+                        level: "warning",
+                        line: lineNumber,
+                        message: `Unsupported style token: ${token}`,
+                    });
+                    continue;
+                }
+                for (const item of resolved) {
+                    template.styles[item.key] = item.value;
+                }
+            }
+            statements.push({
+                kind: "style",
+                line: lineNumber,
+                raw: line,
+                entity: name,
+                tokens,
+            });
+            const rest = line.slice(end);
+            // A trailing structure after the anchor continues from the anchored
+            // entity itself: `A: bg #fda/Footer` ≡ style(A) + structure `A / Footer`.
+            structurePart = rest.trim() ? name + rest : "";
         }
 
-        const structure = parseStructureLine(
-            line,
+        const trimmed = structurePart.trim();
+        if (!trimmed) {
+            return;
+        }
+        const statement = parseStructureLine(
+            trimmed,
             lineNumber,
             templates,
             templateOrder,
             diagnostics
         );
-        if (structure) {
-            statements.push(structure);
+        if (statement) {
+            statements.push(statement);
         }
     });
+
+    for (const name of templateOrder) {
+        const template = templates[name];
+        if (template.interiorDeclarations.length >= 2) {
+            const lineNumbers = template.interiorDeclarations
+                .map((declaration) => declaration.line)
+                .join("、");
+            diagnostics.push({
+                level: "warning",
+                line: template.firstDefinedLine,
+                message:
+                    `${name} 的内部结构被声明 ${template.interiorDeclarations.length} 次` +
+                    `（第 ${lineNumbers} 行），按行序后者生效；同行内的声明按书写位置各自呈现`,
+            });
+        }
+    }
 
     return {
         source,
@@ -516,4 +529,3 @@ export function parse(source: string): ParsedDocument {
         diagnostics,
     };
 }
-

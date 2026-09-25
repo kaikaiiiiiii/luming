@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>路明 Playground</title>
+<style>
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body { margin: 0; font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif; background: #f1f5f9; color: #0f172a; display: flex; flex-direction: column; }
+    header { padding: 10px 16px; background: #ffffff; border-bottom: 1px solid #e2e8f0; display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+    header h1 { font-size: 18px; margin: 0; }
+    header .sub { color: #64748b; font-size: 13px; }
+    header .examples { margin-left: auto; display: flex; gap: 6px; }
+    header button { font: inherit; font-size: 12px; padding: 4px 12px; border: 1px solid #cbd5e1; background: #f8fafc; border-radius: 999px; cursor: pointer; color: #334155; }
+    header button:hover { background: #e2e8f0; }
+    main { flex: 1; display: flex; min-height: 0; }
+    .editor-pane { width: 46%; min-width: 320px; display: flex; flex-direction: column; border-right: 1px solid #e2e8f0; background: #0f172a; }
+    .editor-pane .pane-tag { padding: 6px 14px; font-size: 11px; color: #64748b; border-bottom: 1px solid #1e293b; display: flex; gap: 10px; align-items: center; }
+    .pane-tag .legend i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+    .legend .lv-alive { background: #fbbf24; }
+    .legend .lv-dead { background: #475569; }
+    .editor-stack { position: relative; flex: 1; min-height: 0; }
+    .editor-stack pre, .editor-stack textarea {
+        position: absolute; inset: 0; margin: 0; padding: 14px;
+        font: 13px/1.7 Consolas, "Cascadia Mono", Menlo, monospace;
+        white-space: pre; tab-size: 2;
+    }
+    .editor-stack pre { pointer-events: none; overflow: hidden; color: #e2e8f0; }
+    .editor-stack textarea {
+        background: transparent; color: transparent; caret-color: #38bdf8;
+        border: 0; outline: none; resize: none; overflow: auto;
+    }
+    .editor-stack textarea::selection { background: rgba(56, 189, 248, 0.28); }
+    .tok-op { color: #7dd3fc; }
+    .tok-name { color: #f8fafc; font-weight: 600; }
+    .tok-colon { color: #7dd3fc; }
+    .tok-style { color: #fbbf24; }
+    .tok-sep { color: #475569; }
+    .dead { color: #64748b !important; font-weight: 400 !important; }
+    .view-pane { flex: 1; overflow: auto; padding: 16px 20px; }
+    #diagnostics:empty { display: none; }
+    .diags { background: #fff7ed; border: 1px solid #fdba74; border-radius: 8px; padding: 8px 12px; font-size: 12px; color: #9a3412; margin-bottom: 14px; }
+    .diags.has-error { background: #fef2f2; border-color: #fca5a5; color: #991b1b; }
+    .diags div { padding: 2px 0; }
+    .lm-scene { margin-bottom: 22px; }
+    .lm-scene-tag { font-size: 11px; color: #94a3b8; margin-bottom: 4px; }
+    .lm-node .lm-label { font-size: 11px; font-weight: 600; color: #334155; margin-bottom: 4px; }
+    .empty { color: #94a3b8; font-size: 13px; }
+    .empty code { background: #e2e8f0; border-radius: 4px; padding: 1px 6px; }
+</style>
+</head>
+<body>
+<header>
+    <h1>路明 Playground</h1>
+    <span class="sub">左侧输入 .luming 源码，右侧按当前规则实时渲染 DOM 结构（同行并行 / 行间覆盖 / 递归截断）</span>
+    <div class="examples">
+        <button data-example="quickstart">快速开始</button>
+        <button data-example="revision">行间覆盖</button>
+        <button data-example="parallel">同行并行</button>
+        <button data-example="circular">递归截断</button>
+    </div>
+</header>
+<main>
+    <section class="editor-pane">
+        <div class="pane-tag">
+            <span>源码（.luming）</span>
+            <span class="legend"><i class="lv-alive"></i>生效</span>
+            <span class="legend"><i class="lv-dead"></i>置灰 = 被后续声明覆盖</span>
+        </div>
+        <div class="editor-stack">
+            <pre id="highlight" aria-hidden="true"><code id="highlightCode"></code></pre>
+            <textarea id="source" spellcheck="false" autofocus></textarea>
+        </div>
+    </section>
+    <section class="view-pane">
+        <div id="diagnostics"></div>
+        <div id="render"></div>
+    </section>
+</main>
+
+<script>
+/*__MODULES__*/
+</script>
+<script>
+(function () {
+    "use strict";
+    var compile = __registry["./compile"].compile;
+    var resolveStyleToken = __registry["./style"].resolveStyleToken;
+
+    var EXAMPLES = {
+        quickstart:
+            "Header / Sidebar + Main [ Tabs / Content ] / Footer\n" +
+            "Content [Form / Preview]\n\n" +
+            "Main: bg #fda; 70;\n" +
+            "Tabs: label;\n" +
+            "Form: rd 4;",
+        revision:
+            "header / main [up + down] / footer\n" +
+            "main[good bad]\n" +
+            "header / main [left + right] / footer",
+        parallel:
+            "Row [ Col[Titles] + Col[Body] ]\n" +
+            "\n" +
+            "List [Item: bg #99f; Item Item]\n" +
+            "Item: bg #f99;",
+        circular:
+            "A[B]\n" +
+            "B[A]\n" +
+            "\n" +
+            "List[Item Item Item]"
+    };
+
+    var LEVEL_COLORS = ["#2563eb", "#7c3aed", "#059669", "#d97706", "#dc2626", "#0891b2"];
+    var DEFAULT_STYLES = {
+        border: "1px solid #cbd5e1",
+        padding: "8px",
+        margin: "6px",
+        "border-radius": "8px",
+        "background-color": "#ffffff"
+    };
+
+    var STRUCTURE_CHARS = "+/[]()";
+    var BARE_NAME_RE = /^[A-Za-z][A-Za-z0-9_]*$/;
+    var LEADING_ANCHOR_RE = /^([A-Za-z][A-Za-z0-9_]*)\s*:\s*/;
+
+    var sourceEl = document.getElementById("source");
+    var highlightCodeEl = document.getElementById("highlightCode");
+    var highlightPreEl = document.getElementById("highlight");
+    var renderEl = document.getElementById("render");
+    var diagEl = document.getElementById("diagnostics");
+
+    /* ---------------- 语法高亮（与 parser 相同的扫描规则） ---------------- */
+
+    function escapeHtml(text) {
+        return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    function span(cls, text) {
+        return '<span class="' + cls + '">' + escapeHtml(text) + "</span>";
+    }
+
+    function findStyleChunkEnd(source, start) {
+        var i = start;
+        while (i < source.length) {
+            var ch = source[i];
+            if (STRUCTURE_CHARS.indexOf(ch) >= 0) break;
+            if (ch === ";") {
+                var j = i + 1;
+                while (j < source.length && /\s/.test(source[j])) j += 1;
+                var k = j, seg = "";
+                while (k < source.length && STRUCTURE_CHARS.indexOf(source[k]) < 0 && source[k] !== ";") {
+                    seg += source[k];
+                    k += 1;
+                }
+                var words = seg.trim().split(/\s+/).filter(Boolean);
+                var allNames = words.length > 0 && words.every(function (w) { return BARE_NAME_RE.test(w); });
+                if (allNames) return i + 1;
+            }
+            i += 1;
+        }
+        return i;
+    }
+
+    function styleSegments(source, start, end) {
+        var segs = [];
+        var segStart = start;
+        for (var i = start; i <= end; i += 1) {
+            if (i === end || source[i] === ";") {
+                var text = source.slice(segStart, i);
+                if (text.trim()) segs.push({ text: text, start: segStart, end: i });
+                segStart = i + 1;
+            }
+        }
+        return segs;
+    }
+
+    function tokenKeys(token) {
+        var resolved = resolveStyleToken(token) || [];
+        return resolved.map(function (item) { return item.key; });
+    }
+
+    /* 逐行高亮上下文：场景行、每行容器声明（含 dead 标记）、样式行死属性 */
+    function buildContext(result) {
+        var doc = result.document;
+        var sceneLines = {};
+        result.sceneLineNumbers.forEach(function (line) { sceneLines[line] = true; });
+
+        var maxDeclLine = {};
+        Object.keys(doc.templates).forEach(function (name) {
+            var max = 0;
+            doc.templates[name].interiorDeclarations.forEach(function (d) {
+                if (d.line > max) max = d.line;
+            });
+            maxDeclLine[name] = max;
+        });
+
+        var containersByLine = {};
+        doc.statements.forEach(function (st) {
+            if (st.kind !== "structure") return;
+            var list = [];
+            (function walk(expr) {
+                if (expr.kind === "container") {
+                    list.push({
+                        name: expr.name,
+                        dead: st.line < maxDeclLine[expr.name]
+                    });
+                    walk(expr.content);
+                } else if (expr.kind === "group") {
+                    expr.children.forEach(walk);
+                }
+            })(st.expression);
+            containersByLine[st.line] = list;
+        });
+
+        var styleLines = {};
+        var laterKeysByEntity = {};
+        var styleStatements = doc.statements.filter(function (s) { return s.kind === "style"; });
+        for (var i = styleStatements.length - 1; i >= 0; i -= 1) {
+            var st = styleStatements[i];
+            var keys = {};
+            st.tokens.forEach(function (token) {
+                tokenKeys(token).forEach(function (key) { keys[key] = true; });
+            });
+            var deadKeys = {};
+            var later = laterKeysByEntity[st.entity];
+            if (later) {
+                Object.keys(later).forEach(function (key) {
+                    if (keys[key]) deadKeys[key] = true;
+                });
+            }
+            styleLines[st.line] = { entity: st.entity, deadKeys: deadKeys };
+            var acc = laterKeysByEntity[st.entity];
+            if (!acc) { acc = {}; laterKeysByEntity[st.entity] = acc; }
+            Object.keys(keys).forEach(function (key) { acc[key] = true; });
+        }
+
+        return { sceneLines: sceneLines, containersByLine: containersByLine, styleLines: styleLines };
+    }
+
+    function emitStyleSegments(source, start, end, deadKeys) {
+        var html = "";
+        styleSegments(source, start, end).forEach(function (seg, index, all) {
+            var keys = tokenKeys(seg.text);
+            var dead = keys.length > 0 && keys.every(function (key) { return deadKeys[key]; });
+            html += span(dead ? "tok-style dead" : "tok-style", seg.text);
+            if (index < all.length - 1 && source[seg.end] === ";") {
+                html += span("tok-sep", ";");
+            }
+        });
+        return html;
+    }
+
+    function highlightStructure(source, start, end, ctx, lineNumber) {
+        var html = "";
+        var containers = ctx.containersByLine[lineNumber] || [];
+        var containerIndex = 0;
+        var i = start;
+        while (i < end) {
+            var ch = source[i];
+            if (/\s/.test(ch)) { html += escapeHtml(ch); i += 1; continue; }
+            if (STRUCTURE_CHARS.indexOf(ch) >= 0) { html += span("tok-op", ch); i += 1; continue; }
+            if (!/^[A-Za-z]$/.test(ch)) { html += escapeHtml(ch); i += 1; continue; }
+
+            var nameStart = i;
+            i += 1;
+            while (i < end && /[A-Za-z0-9_]/.test(source[i])) i += 1;
+            var name = source.slice(nameStart, i);
+
+            var probe = i;
+            while (probe < end && /\s/.test(source[probe])) probe += 1;
+            if (source[probe] === ":") {
+                // 行内样式锚点：实例级样式，永远生效
+                html += span("tok-name", name);
+                html += span("tok-colon", source.slice(i, probe + 1));
+                var anchorEnd = findStyleChunkEnd(source, probe + 1);
+                html += emitStyleSegments(source, probe + 1, anchorEnd, {});
+                i = anchorEnd;
+                continue;
+            }
+            if (source[i] === "[") {
+                var depth = 0, close = i;
+                for (; close < end; close += 1) {
+                    if (source[close] === "[") depth += 1;
+                    else if (source[close] === "]") {
+                        depth -= 1;
+                        if (depth === 0) { close += 1; break; }
+                    }
+                }
+                var info = containers[containerIndex] || { dead: false };
+                containerIndex += 1;
+                html += span(info.dead ? "tok-name dead" : "tok-name", source.slice(nameStart, close));
+                i = close;
+                continue;
+            }
+            html += span("tok-name", name);
+        }
+        return html;
+    }
+
+    function highlightLine(source, lineNumber, ctx) {
+        var line = source.split("\n")[lineNumber - 1];
+        if (line === undefined || line.trim() === "") return "";
+
+        var isStructureLine = Object.prototype.hasOwnProperty.call(ctx.containersByLine, lineNumber);
+        var styleInfo = ctx.styleLines[lineNumber];
+        var isSceneLine = !!ctx.sceneLines[lineNumber];
+
+        var html = "";
+        var structureStart = 0;
+
+        var leadingAnchor = LEADING_ANCHOR_RE.exec(line);
+        if (leadingAnchor) {
+            var anchorEnd = leadingAnchor[0].length;
+            var chunkEnd = findStyleChunkEnd(line, anchorEnd);
+            var deadKeys = styleInfo ? styleInfo.deadKeys : {};
+            html += span("tok-name", leadingAnchor[1]);
+            html += span("tok-colon", line.slice(leadingAnchor[1].length, anchorEnd));
+            html += emitStyleSegments(line, anchorEnd, chunkEnd, deadKeys);
+            structureStart = chunkEnd;
+            isStructureLine = Object.prototype.hasOwnProperty.call(ctx.containersByLine, lineNumber);
+        } else if (!isStructureLine && !styleInfo) {
+            return span("tok-plain", line);
+        }
+
+        if (!isStructureLine) {
+            // 纯样式行到此结束
+            return html;
+        }
+
+        var containersList = ctx.containersByLine[lineNumber] || [];
+        var allDead = containersList.length > 0 && containersList.every(function (c) { return c.dead; });
+        var wholeDead = !isSceneLine && !leadingAnchor && (containersList.length === 0 || allDead);
+
+        if (wholeDead) {
+            return span("dead", line);
+        }
+        html += highlightStructure(line, structureStart, line.length, ctx, lineNumber);
+        return html;
+    }
+
+    function refreshHighlight(result) {
+        var ctx = buildContext(result);
+        var source = sourceEl.value;
+        var lines = source.split("\n").map(function (_line, idx) {
+            return highlightLine(source, idx + 1, ctx);
+        });
+        highlightCodeEl.innerHTML = lines.join("\n") + "\n";
+        syncScroll();
+    }
+
+    function syncScroll() {
+        highlightPreEl.scrollTop = sourceEl.scrollTop;
+        highlightPreEl.scrollLeft = sourceEl.scrollLeft;
+    }
+
+    /* ---------------- 右侧渲染 ---------------- */
+
+    function applyStyles(el, styles) {
+        for (var key in styles) {
+            if (Object.prototype.hasOwnProperty.call(styles, key)) {
+                el.style.setProperty(key, styles[key]);
+            }
+        }
+    }
+
+    function renderNode(node, level) {
+        var div = document.createElement("div");
+        div.className = "lm-node";
+        var styles = {};
+        var key;
+        for (key in DEFAULT_STYLES) {
+            if (Object.prototype.hasOwnProperty.call(DEFAULT_STYLES, key)) styles[key] = DEFAULT_STYLES[key];
+        }
+        styles.border = "1px solid " + LEVEL_COLORS[level % LEVEL_COLORS.length];
+        for (key in node.styles) {
+            if (Object.prototype.hasOwnProperty.call(node.styles, key)) styles[key] = node.styles[key];
+        }
+        applyStyles(div, styles);
+        var label = document.createElement("div");
+        label.className = "lm-label";
+        label.textContent = node.templateName + (node.terminated ? " (Terminus)" : "");
+        div.appendChild(label);
+        if (node.content) {
+            div.appendChild(renderLayout(node.content, level + 1));
+        }
+        return div;
+    }
+
+    function renderLayout(layout, level) {
+        if (layout.kind === "entity") {
+            return renderNode(layout.node, level);
+        }
+        var div = document.createElement("div");
+        div.style.setProperty("display", "flex");
+        div.style.setProperty("flex-direction", layout.direction === "row" ? "row" : "column");
+        div.style.setProperty("gap", "6px");
+        div.style.setProperty("align-items", "stretch");
+        for (var i = 0; i < layout.children.length; i += 1) {
+            div.appendChild(renderLayout(layout.children[i], level));
+        }
+        return div;
+    }
+
+    function renderDiagnostics(diagnostics) {
+        diagEl.innerHTML = "";
+        if (diagnostics.length === 0) return;
+        var box = document.createElement("div");
+        var hasError = false;
+        for (var i = 0; i < diagnostics.length; i += 1) {
+            var d = diagnostics[i];
+            if (d.level === "error") hasError = true;
+            var p = document.createElement("div");
+            p.textContent = "[" + (d.level === "error" ? "错误" : "警告") + "]" +
+                (d.line ? " 第 " + d.line + " 行：" : " ") + d.message;
+            box.appendChild(p);
+        }
+        box.className = "diags" + (hasError ? " has-error" : "");
+        diagEl.appendChild(box);
+    }
+
+    function render() {
+        var result;
+        try {
+            result = compile(sourceEl.value, { mode: "preview" });
+        } catch (err) {
+            renderDiagnostics([{ level: "error", message: "编译器异常：" + (err && err.message ? err.message : String(err)) }]);
+            return;
+        }
+        renderDiagnostics(result.diagnostics);
+        refreshHighlight(result);
+        renderEl.innerHTML = "";
+        if (result.scenes.length === 0) {
+            var empty = document.createElement("p");
+            empty.className = "empty";
+            empty.innerHTML = "没有可渲染的场景：试着写一行结构，如 <code>A [ B / C ]</code>";
+            renderEl.appendChild(empty);
+            return;
+        }
+        for (var i = 0; i < result.scenes.length; i += 1) {
+            var section = document.createElement("section");
+            section.className = "lm-scene";
+            var tag = document.createElement("div");
+            tag.className = "lm-scene-tag";
+            tag.textContent = "场景 " + (i + 1);
+            section.appendChild(tag);
+            section.appendChild(renderLayout(result.scenes[i], 0));
+            renderEl.appendChild(section);
+        }
+    }
+
+    function debounce(fn, wait) {
+        var timer = null;
+        return function () {
+            if (timer) clearTimeout(timer);
+            timer = setTimeout(fn, wait);
+        };
+    }
+
+    sourceEl.addEventListener("input", debounce(render, 200));
+    sourceEl.addEventListener("scroll", syncScroll);
+    sourceEl.addEventListener("keydown", function (event) {
+        if (event.key === "Tab") {
+            event.preventDefault();
+            var start = sourceEl.selectionStart;
+            var end = sourceEl.selectionEnd;
+            sourceEl.value = sourceEl.value.slice(0, start) + "  " + sourceEl.value.slice(end);
+            sourceEl.selectionStart = sourceEl.selectionEnd = start + 2;
+            render();
+        }
+    });
+
+    var buttons = document.querySelectorAll("header button[data-example]");
+    for (var b = 0; b < buttons.length; b += 1) {
+        buttons[b].addEventListener("click", function (event) {
+            var name = event.target.getAttribute("data-example");
+            sourceEl.value = EXAMPLES[name];
+            render();
+        });
+    }
+
+    sourceEl.value = EXAMPLES.quickstart;
+    render();
+})();
+</script>
+</body>
+</html>

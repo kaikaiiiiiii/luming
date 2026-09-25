@@ -183,6 +183,11 @@ Although **Luming** cannot directly generate complete design drafts or high-fide
 
 # Syntax v0.1
 
+> **v0.1 is finalized.** This chapter is the normative syntax description. The
+> implementation-level documentation of parsing, merging, and expansion semantics
+> is in [docs/parse-rule.md](docs/parse-rule.md) (described after the actual
+> interpreter); the design-decision trail is in [docs/design-notes.md](docs/design-notes.md).
+
 <span style='color: #ffb464; font-weight: bold;'>**Luming**</span>'s syntax is designed to be concise and intuitive, allowing for the quick expression of interface structures and layout relationships. Here are the basic syntax rules for version v0.1:
 
 ## Entity Names
@@ -217,6 +222,11 @@ Although **Luming** cannot directly generate complete design drafts or high-fide
                      Main [ Tabs / Content ]
                                    Content [ Form / Preview]
   ```
+
+  This equivalence holds strictly only when no entity's interior is declared more
+  than once in the document; when an entity's interior is declared multiple times,
+  the single-line form (parallel within a line) and the split form (cross-line
+  override) can differ. See the [extended explanation](docs/rule-explains.md).
 
 * When multiple same name entities appear on the same line, they are treated as multiple distinct copies of that entity. For example:
   ```
@@ -270,19 +280,13 @@ Unlike arithmetic operators, there is no inherent rule in page layout that divis
 
 ## Compositional Syntax
 
-Users can use multiple lines to express the hierarchical relationships and style modifications of the same entity for better readability. Conversely, users can also write all hierarchical relationships and style modifications on a single line to reduce line count. For example:
+Users can use multiple lines to express the hierarchical relationships and style modifications of the same entity for better readability. Multiple lines are the recommended form. Single-line abbreviation is achieved through **inline style anchors** — styles written directly at an entity's occurrence:
 
 ```
-H / L + R / F
-R[ T / V ]
-R: bg #fda; 70;
+List [Item: bg #99f; Item Item]
 ```
 
-is equivalent to
-
-```
-H / L + R [ T / V ]: bg #fda; 70;/F
-```
+An entity's own entity-level style (e.g. `R: bg #fda; 70;`) should be written on its own line; style suffixes written after a container's brackets (e.g. `R [ T / V ]: bg #fda;`) are **not supported**.
 
 ## Advanced Usage
 
@@ -312,7 +316,10 @@ H / L + R [ T / V ]: bg #fda; 70;/F
 
   The final effect is that A's background color is <span style="background-color: #99f;">#99f</span>, and its width remains 70%.
 
-  The same rule applies to hierarchical relationships and containment. For example:
+  The same rule applies to hierarchical relationships and containment — note that
+  overrides happen **across lines**: multiple writings within one line do not
+  override each other and render at their written positions (see the
+  [extended explanation](docs/rule-explains.md)). For example:
 
   ```
   A / B
@@ -348,7 +355,7 @@ H / L + R [ T / V ]: bg #fda; 70;/F
   B [C]
   C [B]
   ```
-  In **Luming**'s design, circular inclusion is allowed but is explicitly defined as finite expansion. When an entity directly or indirectly includes itself within its expanded hierarchical relationship, the **Luming** parser will expand that entity again as a copy and check if the current expansion forms a loop, at which point it stops. The entity ultimately becomes both the start and end point of a cycle. For the two examples above, the final results are:
+  In **Luming**'s design, circular inclusion is allowed but is explicitly defined as finite expansion. When rendering, every **bare reference** (an occurrence without a written interior) checks the current ancestor chain before fetching its entity's definition: if the entity is already on the chain, that reference itself renders as a **terminus** — rendered normally with its styles, but never expanded. Explicitly written nested structures (such as the middle layer of `A[A[A]]`) are same-line writings: they render as written and are not checked. The entity ultimately becomes both the start and end point of a cycle. For the two examples above, the final results are:
 
   ```
   A
@@ -367,13 +374,13 @@ To understand the principles behind the advanced usage, it's necessary to know t
 
 **Text Parsing**: The **Luming** parser first parses the input text line by line, identifying entity names, hierarchical relationships, style modifications, and other elements from each line, and converts the source code into the parser's own internal data structures.
 
-When subsequent lines contain the same entity name, **Luming** merges them into the existing data structure according to specific rules. Therefore, later definitions can override earlier ones. However, different properties may have different handling methods when conflicts occur. For detailed handling rules, please refer to [the documentation](./docs/parser.md).
+When subsequent lines contain the same entity name, **Luming** merges them into the existing data structure according to specific rules. The two basic rules are: **multiple writings within one line do not override each other (parallel within a line)**, and **re-descriptions of the same entity across lines follow document order, the later one winning (cross-line override)**. For detailed handling rules, please refer to [the documentation](./docs/parse-rule.md).
 
-**Copy Generation**: After parsing is complete, the generator produces a visual preview or front-end code components based on the parsed data structure. During this phase, the generator traverses the hierarchical relationships and style modifications of entities to generate corresponding HTML, CSS, and JavaScript code. If an entity is not contained by any other entity, it will generate independent copies in the order they first appear in the document; if an entity might be contained by others in any position, it will only generate copies within those containing positions.
+**Copy Generation**: After parsing completes, the renderer builds instance trees per **scene**. Scenes are selected in document order: a structure line becomes a scene if any of its top-level subjects has not been placed by an earlier line; a multi-subject line whose subjects are all placed **replaces as a whole** the scene it revises (e.g. `A / B` followed by `A + B`); a single-subject line for an already-placed entity is only recorded as a declaration and no longer forms a scene. Bare references (no written interior) fetch a fallback definition from the entity's declarations; an entity recurring on the ancestor chain is truncated into a terminus.
 
 **Code Composition**: During code generation, the generator will, based on input parameters, append relevant code corresponding to the specific mode when combining the generated entity copies.
 
-Therefore, **Luming**'s text parsing has no situation where 'a later-line definition overrides properties of a copy that already existed in an earlier line' — copy properties are not produced line by line at render time and then modified by later lines. **Luming** reads all lines first, merges the styles and hierarchy relations of entities, and only then generates all copies in a single pass. Later definitions overriding earlier ones happens only during this merge phase: styles merge per property (for the same property, the later one wins), and the hierarchy relation of a structure line starting with the same entity is determined by the last definition. Just as 'a person with no hair never has bed-head'.
+Therefore, **Luming**'s text parsing has no situation where 'a later-line definition overrides properties of a copy that already existed in an earlier line' — copy properties are not produced line by line at render time and then modified by later lines. **Luming** reads all lines first, completes the merge, and then expands all scenes in a single pass. The merge-stage rules are: **multiple writings within one line do not override each other and render at their written positions; re-descriptions of the same entity across lines follow document order, the later one winning**; styles merge per property (for the same property, the later one wins), and inline style anchors bind to their occurrence position and take priority over entity-level styles.
 
 ## Rule Tolerance
 

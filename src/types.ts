@@ -11,9 +11,17 @@ export interface Diagnostic {
 
 export type LayoutDirection = "row" | "column";
 
+/** A resolved style property pair (structural superset of style.ts's ResolvedStyleToken). */
+export interface StylePair {
+    key: string;
+    value: string;
+}
+
 export interface EntityExpr {
     kind: "entity";
     name: string;
+    /** Instance-scoped styles bound to this exact occurrence (inline `Name: ...;` anchor). */
+    inlineStyles?: StylePair[];
 }
 
 export interface GroupExpr {
@@ -26,6 +34,8 @@ export interface ContainerExpr {
     kind: "container";
     name: string;
     content: ExpressionNode;
+    /** Instance-scoped styles bound to this exact occurrence. */
+    inlineStyles?: StylePair[];
 }
 
 export type ExpressionNode = EntityExpr | GroupExpr | ContainerExpr;
@@ -36,8 +46,6 @@ export interface StructureStatement {
     raw: string;
     topLevelEntities: string[];
     expression: ExpressionNode;
-    /** First entity in pre-order; structure lines are grouped by this slot and later lines override earlier ones. */
-    slotEntity: string;
 }
 
 export interface StyleStatement {
@@ -50,12 +58,22 @@ export interface StyleStatement {
 
 export type ParsedStatement = StructureStatement | StyleStatement;
 
+/**
+ * One written `X[...]` occurrence: a declaration of X's interior.
+ * `order` is the traversal index within its line (same-line declarations are parallel).
+ */
+export interface InteriorDeclaration {
+    line: number;
+    order: number;
+    content: ExpressionNode;
+}
+
 export interface TemplateDefinition {
     name: string;
     firstDefinedLine: number;
-    defaultChildren: string[];
+    interiorDeclarations: InteriorDeclaration[];
+    /** Entity-level styles, merged per property in line order. */
     styles: Record<string, string>;
-    contentExpression: ExpressionNode | null;
 }
 
 export interface ParsedDocument {
@@ -97,6 +115,8 @@ export interface CompileResult {
     document: ParsedDocument;
     roots: RuntimeNode[];
     scenes: RuntimeLayoutNode[];
+    /** Source line numbers of the rendered scenes (for override-aware tooling). */
+    sceneLineNumbers: number[];
     diagnostics: Diagnostic[];
 }
 

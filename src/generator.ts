@@ -228,8 +228,15 @@ export function generateFiles(
             continue;
         }
         const template = result.document.templates[name];
+        // The generated component renders the entity's latest declared interior
+        // (docs/parse-rule.md §3: same-line declarations are parallel, cross-line
+        // declarations cascade — the last one is the component's definition).
+        const declarations = template.interiorDeclarations;
+        const content = declarations.length > 0
+            ? declarations[declarations.length - 1].content
+            : null;
         files.push(
-            createSingleFile(framework, name, template.contentExpression, template.styles, toFinalName)
+            createSingleFile(framework, name, content, template.styles, toFinalName)
         );
     }
 

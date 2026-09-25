@@ -1,109 +1,96 @@
 # AGENTS.md
 
-Guidance for AI coding agents working in this repository.
+面向在本仓库中工作的 AI 编码代理的指引。
 
-## Core Principle (项目核心准则)
+## 核心准则
 
-**`README.zh-CN.md` is the canonical specification of this project.**
+**`README.zh-CN.md` 是本项目的规范源（canonical specification）。**
 
-- `README.zh-CN.md` is the source of truth (规范源). `README.md` (English) is a
-  translation of it; the code, `docs/`, `examples/`, and all other content are
-  **implementations** of `README.zh-CN.md`.
-- Any inconsistency between other content and `README.zh-CN.md` is resolved in
-  favor of `README.zh-CN.md`: fix the other content to match the spec, never
-  rewrite the spec to match the implementation.
-- Only **internal conflicts inside `README.zh-CN.md` itself** (contradictory
-  statements between its own sections) require the user to arbitrate; do not
-  decide those unilaterally. When in doubt about such a conflict, ask the user.
-- When changing behavior, keep `README.zh-CN.md` in sync first, then update
-  `README.md` (translation) and the implementation to match.
+- `README.zh-CN.md` 是唯一事实来源。`README.md`（英文版）是它的翻译；代码、`docs/`、`examples/` 以及其他所有内容都是 `README.zh-CN.md` 的**实现**。
+- 其他任何内容与 `README.zh-CN.md` 不一致时，一律以 `README.zh-CN.md` 为准：修改其他内容去符合规范，绝不为迁就实现而改写规范。
+- 只有 `README.zh-CN.md` **自身内部的冲突**（其不同章节之间相互矛盾的表述）才需要由用户仲裁；不要擅自做主。对这类冲突有疑问时，请询问用户。
+- 修改行为时，先同步 `README.zh-CN.md`，再更新 `README.md`（翻译版）和实现，使其保持一致。
 
-## Project Overview
+## 项目概述
 
-**Luming** (路明) is a textual DSL and CLI tool for describing static page
-structures. It parses a `.luming` text file into a structural model and then
-compiles it into either a single-file HTML preview or a set of component files
-(HTML, Vue, or React).
+**路明（Luming）** 是一种用于描述静态页面结构的文本 DSL 和配套 CLI 工具。它将 `.luming` 文本文件解析为结构模型，然后编译为单文件 HTML 预览，或一组组件文件（HTML、Vue 或 React）。
 
-**Important caveat**: This tool is AI-generated and untested. Do not use it on
-existing projects; only test it in new/experimental ones.
+**重要提示**：本工具由 AI 生成且未经测试。不要在已有项目中使用它；只在新项目或实验性项目中试用。
 
-## Commands
+## 常用命令
 
 ```bash
-npm run build       # compile TypeScript to dist/ (tsc -p tsconfig.json)
-npm run typecheck   # type-check only, no emit (tsc --noEmit)
-npm run clean       # remove dist/
+npm run build       # 将 TypeScript 编译到 dist/（tsc -p tsconfig.json）
+npm run typecheck   # 仅类型检查，不产出文件（tsc --noEmit）
+npm run clean       # 删除 dist/
 npm run preview     # node dist/cli.js preview
 npm run generate    # node dist/cli.js generate
+npm run playground  # 由模板 + dist 模块重新生成单文件 playground.html
 ```
 
-CLI usage (after build):
+CLI 用法（构建后）：
 
 ```bash
 node dist/cli.js preview <input.luming> [-o output.html]
 node dist/cli.js generate <input.luming> [-o outdir] [--framework html|vue|react] [--config path]
 ```
 
-Verify changes with `npm run typecheck` and, when behavior changed, `npm run build`.
+用 `npm run typecheck` 验证改动；若行为发生变化，还需运行 `npm run build`。
 
-## Repository Layout
+## 仓库结构
 
 ```
-index.ts            # top-level entry, re-exports src/*
-cli.ts              # CLI argument parsing and preview/generate subcommands
-index.d.ts          # type declarations
+index.ts            # 顶层入口，re-export src/* 的内容
+cli.ts              # CLI 参数解析及 preview/generate 子命令
+index.d.ts          # 类型声明
 src/
-  types.ts          # core type definitions (AST, runtime, compile/generate options)
-  style.ts          # style token resolution (bg, rd, classes, css-like, widths)
-  parser.ts         # text -> ParsedDocument (AST)
-  compile.ts        # AST -> RuntimeNode/RuntimeLayoutNode roots and scenes
-  renderer.ts       # compile result -> preview HTML
-  generator.ts      # compile result -> component files (html/vue/react)
-  index.ts          # re-exports src modules
-docs/               # documentation (partially incomplete)
-examples/           # .luming inputs and generated output for all frameworks
+  types.ts          # 核心类型定义（AST、运行时、compile/generate 选项）
+  style.ts          # 样式 token 解析（bg、rd、预设类、css 类、宽度）
+  parser.ts         # 文本 -> ParsedDocument（AST）
+  compile.ts        # AST -> RuntimeNode/RuntimeLayoutNode 根节点与场景
+  renderer.ts       # 编译结果 -> 预览 HTML
+  generator.ts      # 编译结果 -> 组件文件（html/vue/react）
+  index.ts          # re-export src 各模块
+docs/               # 文档：parse-rule.md（解析/合并/展开语义，定稿）、design-notes.md（裁决轨迹）、style.md
+examples/           # .luming 输入及各框架的生成产物
+scripts/            # playground 构建脚本与模板（生成单文件 playground.html）
+playground.html     # 单文件可交互预览页（浏览器直接打开；npm run playground 重新生成）
+ChagGPT-Luming_Lang_Design_Discuss.md # 本项目最初的需求、创意与头脑风暴讨论文档
 ```
 
-Processing pipeline: `parse` -> `compile` -> `renderPreviewHtml` or
-`generateFiles`. Each stage is a pure function over the types in `src/types.ts`.
+处理流水线：`parse` -> `compile` -> `renderPreviewHtml` 或 `generateFiles`。
+每个阶段都是基于 `src/types.ts` 中类型的纯函数。
 
-## Code Conventions
+## 代码约定
 
-- TypeScript, strict mode, target ES2020, CommonJS modules.
-- Indentation: 4 spaces. Double quotes. Semicolons.
-- Functions use explicit return type annotations.
-- Exported APIs are aggregated through `src/index.ts` / `index.ts`.
-- Follow the existing parser/compiler style: small helper functions with a
-  single responsibility, working over the types in `src/types.ts`.
-- Diagnostics are collected on the `ParsedDocument` / `CompileResult` as
-  `Diagnostic[]`; do not throw for recoverable user-input problems in the
-  compiler proper (the CLI catches thrown errors and prints them).
+- TypeScript，strict 模式，target ES2020，CommonJS 模块。
+- 缩进：4 个空格。双引号。分号。
+- 函数使用显式返回类型注解。
+- 导出的 API 统一通过 `src/index.ts` / `index.ts` 聚合。
+- 遵循现有 parser/compiler 的风格：单一职责的小工具函数，基于 `src/types.ts` 中的类型进行操作。
+- 诊断信息以 `Diagnostic[]` 形式收集在 `ParsedDocument` / `CompileResult` 上；编译器本体对可恢复的用户输入问题不要抛异常（CLI 会捕获抛出的错误并打印）。
 
-## Luming DSL Cheat Sheet
+## Luming DSL 速查表
 
-- `/` — vertical stacking (A above B).
-- `+` — horizontal layout (A left of B).
-- `[]` — containment (B contains A and C: `B [ A / C ]`).
-- `()` — grouping / operator precedence (e.g. `A + (B / C)`).
-- Precedence: `[]` > `()` > `+` > `/`.
-- Styles: `Entity: bg #fda; 70;` — content between `:` and `;`, properties
-  separated by `;`. Trailing `;` is optional at end of line.
-- Style tokens: `bg <color>` (background-color), `rd <n>` (border-radius,
-  px suffix auto-added), `tab`/`card`/`label` (preset class), bare number or
-  percent (width %), or `css-prop value` (e.g. `border 1px solid red`).
-- Compositional syntax: the same entity may be defined across multiple lines;
-  later definitions override earlier ones (styles merge per-property).
-- Same-name entities on one line are separate copies (e.g. `List [Item Item Item]`).
-- Circular inclusion is allowed but expanded finitely, stopping at a "terminus".
-- Implicit `+` inside `[]` is allowed when unambiguous: `A[B C]` == `A [ B + C ]`.
+- `/` — 垂直堆叠（A 在 B 上方）。
+- `+` — 水平排列（A 在 B 左侧）。
+- `[]` — 包含（B 包含 A 和 C：`B [ A / C ]`）。
+- `()` — 分组 / 运算符优先级（如 `A + (B / C)`）。
+- 优先级：`[]` > `()` > `+` > `/`。
+- 样式：`Entity: bg #fda; 70;` — `:` 与 `;` 之间为样式内容，各属性用 `;` 分隔。行尾的 `;` 可省略。
+- 样式 token：`bg <color>`（背景色）、`rd <n>`（圆角，自动补 px 后缀）、`tab`/`card`/`label`（预设类）、裸数字或百分比（宽度 %）、或 `css属性 值`（如 `border 1px solid red`）。
+- 多行声明：同一主体可跨多行定义。**同行并行**（同行内的多次声明互不覆盖、按书写位置呈现）、**跨行覆盖**（后行声明覆盖前行，含行内书面结构；样式按属性合并）。
+- 同一行中的同名实体是各自独立的副本（如 `List [Item Item Item]`）。
+- 允许循环包含：裸引用取定义展开前检查祖先链，命中即成为"终止节点"（正常渲染、不再展开）。
+- `[]` 内在无歧义时可省略 `+`：`A[B C]` 等价于 `A [ B + C ]`。
 
-Full syntax reference: `README.md` (§ Syntax v0.1, Styles, Advanced Usage).
-Style presets: `docs/style.md`.
+完整语法参考：`README.zh-CN.md`（§ 语法 v0.1、Styles、Advanced Usage）。
+解析/合并/展开语义（实现级，v0.1 定稿）：`docs/parse-rule.md`。
+样式预设：`docs/style.md`。
 
-## Examples
+## 示例
 
-`examples/quickstart.luming` is the canonical minimal example:
+`examples/quickstart.luming` 是权威的最小示例：
 
 ```
 Header / Sidebar + Main [ Tabs / Content ] / Footer
@@ -114,5 +101,5 @@ Tabs: label;
 Form: rd 4;
 ```
 
-Run `node dist/cli.js preview examples/quickstart.luming -o examples/quickstart.preview.html`
-to regenerate the preview.
+运行 `node dist/cli.js preview examples/quickstart.luming -o examples/quickstart.preview.html`
+可重新生成预览。
