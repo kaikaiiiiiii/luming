@@ -10,10 +10,11 @@ const root = path.join(__dirname, "..");
 const TMP = path.join(root, ".gh-pages-tmp");
 
 function git(args, options = {}) {
-    return execSync("git " + args, {
+    const result = execSync("git " + args, {
         cwd: root,
         stdio: options.quiet ? "pipe" : "inherit",
-    }).toString().trim();
+    });
+    return result ? result.toString().trim() : "";
 }
 
 /** Content-based clean check (ignores EOL phantom modifications). */
