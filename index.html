@@ -1,0 +1,1208 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>路明 Playground</title>
+<style>
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body { margin: 0; font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif; background: #f1f5f9; color: #0f172a; display: flex; flex-direction: column; }
+    header { padding: 10px 16px; background: #ffffff; border-bottom: 1px solid #e2e8f0; display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+    header h1 { font-size: 18px; margin: 0; }
+    header .sub { color: #64748b; font-size: 13px; }
+    header .examples { margin-left: auto; display: flex; gap: 6px; }
+    header button { font: inherit; font-size: 12px; padding: 4px 12px; border: 1px solid #cbd5e1; background: #f8fafc; border-radius: 999px; cursor: pointer; color: #334155; }
+    header button:hover { background: #e2e8f0; }
+    main { flex: 1; display: flex; min-height: 0; }
+    .editor-pane { width: 46%; min-width: 320px; display: flex; flex-direction: column; border-right: 1px solid #e2e8f0; background: #0f172a; }
+    .editor-pane .pane-tag { padding: 6px 14px; font-size: 11px; color: #64748b; border-bottom: 1px solid #1e293b; display: flex; gap: 10px; align-items: center; }
+    .pane-tag .legend i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+    .legend .lv-alive { background: #fbbf24; }
+    .legend .lv-dead { background: #475569; }
+    .editor-stack { position: relative; flex: 1; min-height: 0; }
+    .editor-stack pre, .editor-stack textarea {
+        position: absolute; inset: 0; margin: 0; padding: 14px;
+        font: 13px/1.7 Consolas, "Cascadia Mono", Menlo, monospace;
+        white-space: pre; tab-size: 2;
+    }
+    .editor-stack pre { pointer-events: none; overflow: hidden; color: #e2e8f0; }
+    .editor-stack textarea {
+        background: transparent; color: transparent; caret-color: #38bdf8;
+        border: 0; outline: none; resize: none; overflow: auto;
+    }
+    .editor-stack textarea::selection { background: rgba(56, 189, 248, 0.28); }
+    .tok-op { color: #7dd3fc; }
+    .tok-name { color: #f8fafc; font-weight: 600; }
+    .tok-colon { color: #7dd3fc; }
+    .tok-style { color: #fbbf24; }
+    .tok-sep { color: #475569; }
+    .dead { color: #64748b !important; font-weight: 400 !important; }
+    .view-pane { flex: 1; overflow: auto; padding: 16px 20px; }
+    #diagnostics:empty { display: none; }
+    .diags { background: #fff7ed; border: 1px solid #fdba74; border-radius: 8px; padding: 8px 12px; font-size: 12px; color: #9a3412; margin-bottom: 14px; }
+    .diags.has-error { background: #fef2f2; border-color: #fca5a5; color: #991b1b; }
+    .diags div { padding: 2px 0; }
+    .lm-scene { margin-bottom: 22px; }
+    .lm-scene-tag { font-size: 11px; color: #94a3b8; margin-bottom: 4px; }
+    .lm-node .lm-label { font-size: 11px; font-weight: 600; color: #334155; margin-bottom: 4px; }
+    .empty { color: #94a3b8; font-size: 13px; }
+    .empty code { background: #e2e8f0; border-radius: 4px; padding: 1px 6px; }
+</style>
+</head>
+<body>
+<header>
+    <h1>路明 Playground</h1>
+    <span class="sub">左侧输入 .luming 源码，右侧按当前规则实时渲染 DOM 结构（同行并行 / 行间覆盖 / 递归截断）</span>
+    <div class="examples">
+        <button data-example="quickstart">快速开始</button>
+        <button data-example="revision">行间覆盖</button>
+        <button data-example="parallel">同行并行</button>
+        <button data-example="circular">递归截断</button>
+    </div>
+</header>
+<main>
+    <section class="editor-pane">
+        <div class="pane-tag">
+            <span>源码（.luming）</span>
+            <span class="legend"><i class="lv-alive"></i>生效</span>
+            <span class="legend"><i class="lv-dead"></i>置灰 = 被后续声明覆盖</span>
+        </div>
+        <div class="editor-stack">
+            <pre id="highlight" aria-hidden="true"><code id="highlightCode"></code></pre>
+            <textarea id="source" spellcheck="false" autofocus></textarea>
+        </div>
+    </section>
+    <section class="view-pane">
+        <div id="diagnostics"></div>
+        <div id="render"></div>
+    </section>
+</main>
+
+<script>
+// Embedded Luming compiler (built from dist/src, CommonJS shim).
+// Regenerate with: npm run build && npm run playground
+var __registry = {};
+function __define(name, factory) {
+    var module = { exports: {} };
+    factory(module, module.exports, function (dep) {
+        if (!Object.prototype.hasOwnProperty.call(__registry, dep)) {
+            throw new Error('module not found: ' + dep);
+        }
+        return __registry[dep];
+    });
+    __registry[name] = module.exports;
+}
+__define("./types", function (module, exports, require) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+//# sourceMappingURL=types.js.map
+});
+
+__define("./style", function (module, exports, require) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.resolveStyleToken = resolveStyleToken;
+const NUMBER_ONLY_RE = /^\d+(?:\.\d+)?$/;
+const PERCENT_RE = /^\d+(?:\.\d+)?%$/;
+/**
+ * Preset classes (README「语法 v0.1 - 样式」, full list in docs/style.md).
+ * Each preset expands to concrete CSS properties so the emitted styles are always valid.
+ */
+const PRESET_CSS = {
+    tab: {
+        display: "inline-block",
+        padding: "4px 12px",
+        border: "1px solid #cbd5e1",
+        "border-radius": "9999px",
+        "background-color": "#f1f5f9",
+        color: "#334155",
+    },
+    card: {
+        display: "block",
+        padding: "12px",
+        border: "1px solid #e2e8f0",
+        "border-radius": "8px",
+        "background-color": "#ffffff",
+        "box-shadow": "0 1px 3px rgba(0, 0, 0, 0.1)",
+    },
+    label: {
+        display: "inline-block",
+        padding: "2px 8px",
+        border: "1px solid #c7d2fe",
+        "border-radius": "4px",
+        "background-color": "#eef2ff",
+        color: "#3730a3",
+        "font-size": "12px",
+    },
+};
+function ensurePx(value) {
+    if (NUMBER_ONLY_RE.test(value)) {
+        return `${value}px`;
+    }
+    return value;
+}
+function resolveStyleToken(token) {
+    const trimmed = token.trim();
+    if (!trimmed) {
+        return null;
+    }
+    const [head, ...restParts] = trimmed.split(/\s+/);
+    const rest = restParts.join(" ").trim();
+    if (head === "bg" && rest) {
+        return [{ key: "background-color", value: rest }];
+    }
+    if (head === "rd" && rest) {
+        return [{ key: "border-radius", value: ensurePx(rest) }];
+    }
+    if (head === "tab" || head === "card" || head === "label") {
+        const preset = PRESET_CSS[head];
+        return Object.entries(preset).map(([key, value]) => ({ key, value }));
+    }
+    if (NUMBER_ONLY_RE.test(trimmed)) {
+        return [{ key: "width", value: `${trimmed}%` }];
+    }
+    if (PERCENT_RE.test(trimmed)) {
+        return [{ key: "width", value: trimmed }];
+    }
+    const cssLike = /^([a-zA-Z-]+)\s+(.+)$/.exec(trimmed);
+    if (cssLike) {
+        return [{ key: cssLike[1], value: cssLike[2] }];
+    }
+    return null;
+}
+//# sourceMappingURL=style.js.map
+});
+
+__define("./parser", function (module, exports, require) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.parse = parse;
+const style_1 = require("./style");
+const STRUCTURE_CHARS = new Set(["+", "/", "[", "]", "(", ")"]);
+const NAME_START_RE = /^[A-Za-z]$/;
+const NAME_CHAR_RE = /^[A-Za-z0-9_]$/;
+const BARE_NAME_RE = /^[A-Za-z][A-Za-z0-9_]*$/;
+const LEADING_ANCHOR_RE = /^([A-Za-z][A-Za-z0-9_]*)\s*:\s*/;
+class ExpressionParser {
+    constructor(tokens) {
+        this.index = 0;
+        this.tokens = tokens;
+    }
+    parseRoot(allowImplicitPlus = false) {
+        const expr = this.parseSlash(allowImplicitPlus);
+        if (!this.eof()) {
+            const token = this.peek();
+            const msg = token
+                ? `Unexpected token '${token.value}' at ${token.index}`
+                : "Unexpected EOF";
+            throw new Error(msg);
+        }
+        return expr;
+    }
+    parseSlash(allowImplicitPlus) {
+        const nodes = [this.parsePlus(allowImplicitPlus)];
+        while (this.match("slash")) {
+            this.consume("slash");
+            nodes.push(this.parsePlus(allowImplicitPlus));
+        }
+        return collapseGroup("column", nodes);
+    }
+    parsePlus(allowImplicitPlus) {
+        const nodes = [this.parsePostfix(allowImplicitPlus)];
+        while (true) {
+            if (this.match("plus")) {
+                this.consume("plus");
+                nodes.push(this.parsePostfix(allowImplicitPlus));
+                continue;
+            }
+            if (allowImplicitPlus && this.isPrimaryStart(this.peek())) {
+                nodes.push(this.parsePostfix(allowImplicitPlus));
+                continue;
+            }
+            break;
+        }
+        return collapseGroup("row", nodes);
+    }
+    parsePostfix(allowImplicitPlus) {
+        let node = this.parsePrimary(allowImplicitPlus);
+        while (this.match("lbracket")) {
+            this.consume("lbracket");
+            const content = this.parseSlash(true);
+            this.consume("rbracket");
+            if (node.kind !== "entity") {
+                throw new Error("Only entity can be used as container target before '[]'");
+            }
+            node = {
+                kind: "container",
+                name: node.name,
+                content,
+                inlineStyles: node.inlineStyles,
+            };
+        }
+        return node;
+    }
+    parsePrimary(allowImplicitPlus) {
+        const token = this.peek();
+        if (!token) {
+            throw new Error("Unexpected end of expression");
+        }
+        if (token.type === "name") {
+            this.index += 1;
+            const entity = { kind: "entity", name: token.value };
+            if (token.inlineStyles && token.inlineStyles.length > 0) {
+                entity.inlineStyles = token.inlineStyles;
+            }
+            return entity;
+        }
+        if (token.type === "lparen") {
+            this.index += 1;
+            const expr = this.parseSlash(allowImplicitPlus);
+            this.consume("rparen");
+            return expr;
+        }
+        throw new Error(`Unexpected token '${token.value}' at ${token.index}`);
+    }
+    isPrimaryStart(token) {
+        return token?.type === "name" || token?.type === "lparen";
+    }
+    match(type) {
+        return this.peek()?.type === type;
+    }
+    consume(type) {
+        const token = this.peek();
+        if (!token || token.type !== type) {
+            const value = token?.value ?? "EOF";
+            throw new Error(`Expected ${type}, found '${value}'`);
+        }
+        this.index += 1;
+        return token;
+    }
+    peek() {
+        return this.tokens[this.index];
+    }
+    eof() {
+        return this.index >= this.tokens.length;
+    }
+}
+function ensureTemplate(templates, templateOrder, name, line) {
+    const existing = templates[name];
+    if (existing) {
+        return existing;
+    }
+    const created = {
+        name,
+        firstDefinedLine: line,
+        interiorDeclarations: [],
+        styles: {},
+    };
+    templates[name] = created;
+    templateOrder.push(name);
+    return created;
+}
+function collapseGroup(direction, nodes) {
+    if (nodes.length === 1) {
+        return nodes[0];
+    }
+    const flattened = [];
+    for (const node of nodes) {
+        if (node.kind === "group" && node.direction === direction) {
+            flattened.push(...node.children);
+        }
+        else {
+            flattened.push(node);
+        }
+    }
+    return { kind: "group", direction, children: flattened };
+}
+/**
+ * Scan a style chunk starting right after a `name:` anchor. The chunk ends at a
+ * structure character, at end of line, or at a `;` whose following segment (up to
+ * the next structure char / `;` / EOL) consists solely of bare entity names — that
+ * `;` is the boundary between the style block and sibling entities
+ * (e.g. `Item: bg #99f; Item Item`).
+ */
+function scanStyleChunk(source, start) {
+    let index = start;
+    while (index < source.length) {
+        const char = source[index];
+        if (STRUCTURE_CHARS.has(char)) {
+            break;
+        }
+        if (char === ";") {
+            let cursor = index + 1;
+            while (cursor < source.length && /\s/.test(source[cursor])) {
+                cursor += 1;
+            }
+            let segmentEnd = cursor;
+            while (segmentEnd < source.length &&
+                !STRUCTURE_CHARS.has(source[segmentEnd]) &&
+                source[segmentEnd] !== ";") {
+                segmentEnd += 1;
+            }
+            const words = source.slice(cursor, segmentEnd).trim().split(/\s+/).filter(Boolean);
+            const allBareNames = words.length > 0 && words.every((word) => BARE_NAME_RE.test(word));
+            if (allBareNames) {
+                return { tokens: splitStyleTokens(source.slice(start, index)), end: index + 1 };
+            }
+        }
+        index += 1;
+    }
+    return { tokens: splitStyleTokens(source.slice(start, index)), end: index };
+}
+function splitStyleTokens(chunk) {
+    return chunk
+        .split(";")
+        .map((item) => item.trim())
+        .filter(Boolean);
+}
+function resolveInlineStyles(tokens, lineNumber, diagnostics) {
+    const pairs = [];
+    for (const token of tokens) {
+        const resolved = (0, style_1.resolveStyleToken)(token);
+        if (!resolved) {
+            diagnostics.push({
+                level: "warning",
+                line: lineNumber,
+                message: `Unsupported style token: ${token}`,
+            });
+            continue;
+        }
+        for (const item of resolved) {
+            pairs.push({ key: item.key, value: item.value });
+        }
+    }
+    return pairs;
+}
+function tokenizeStructure(input, lineNumber, diagnostics) {
+    const tokens = [];
+    let index = 0;
+    while (index < input.length) {
+        const char = input[index];
+        if (/\s/.test(char)) {
+            index += 1;
+            continue;
+        }
+        if (char === "+") {
+            tokens.push({ type: "plus", value: char, index });
+            index += 1;
+            continue;
+        }
+        if (char === "/") {
+            tokens.push({ type: "slash", value: char, index });
+            index += 1;
+            continue;
+        }
+        if (char === "[") {
+            tokens.push({ type: "lbracket", value: char, index });
+            index += 1;
+            continue;
+        }
+        if (char === "]") {
+            tokens.push({ type: "rbracket", value: char, index });
+            index += 1;
+            continue;
+        }
+        if (char === "(") {
+            tokens.push({ type: "lparen", value: char, index });
+            index += 1;
+            continue;
+        }
+        if (char === ")") {
+            tokens.push({ type: "rparen", value: char, index });
+            index += 1;
+            continue;
+        }
+        if (NAME_START_RE.test(char)) {
+            const start = index;
+            index += 1;
+            while (index < input.length && NAME_CHAR_RE.test(input[index])) {
+                index += 1;
+            }
+            const value = input.slice(start, index);
+            // Inline style anchor: `Name: tokens` (optional spaces before the colon).
+            let probe = index;
+            while (probe < input.length && /\s/.test(input[probe])) {
+                probe += 1;
+            }
+            if (input[probe] === ":") {
+                const { tokens: styleTokens, end } = scanStyleChunk(input, probe + 1);
+                tokens.push({
+                    type: "name",
+                    value,
+                    index: start,
+                    inlineStyles: resolveInlineStyles(styleTokens, lineNumber, diagnostics),
+                });
+                index = end;
+                continue;
+            }
+            tokens.push({ type: "name", value, index: start });
+            continue;
+        }
+        throw new Error(`Invalid character '${char}' at ${index}`);
+    }
+    return tokens;
+}
+function collectEntityNames(expression, out) {
+    if (expression.kind === "entity") {
+        out.add(expression.name);
+        return;
+    }
+    if (expression.kind === "container") {
+        out.add(expression.name);
+        collectEntityNames(expression.content, out);
+        return;
+    }
+    for (const child of expression.children) {
+        collectEntityNames(child, out);
+    }
+}
+function topLevelEntities(expression) {
+    if (expression.kind === "entity") {
+        return [expression.name];
+    }
+    if (expression.kind === "container") {
+        return [expression.name];
+    }
+    return expression.children.flatMap((child) => topLevelEntities(child));
+}
+function recordDeclarations(expression, lineNumber, order, templates, templateOrder) {
+    if (expression.kind === "entity") {
+        ensureTemplate(templates, templateOrder, expression.name, lineNumber);
+        return;
+    }
+    if (expression.kind === "container") {
+        const template = ensureTemplate(templates, templateOrder, expression.name, lineNumber);
+        template.interiorDeclarations.push({
+            line: lineNumber,
+            order: order.value++,
+            content: expression.content,
+        });
+        recordDeclarations(expression.content, lineNumber, order, templates, templateOrder);
+        return;
+    }
+    for (const child of expression.children) {
+        recordDeclarations(child, lineNumber, order, templates, templateOrder);
+    }
+}
+function parseStructureLine(structurePart, lineNumber, templates, templateOrder, diagnostics) {
+    try {
+        const tokens = tokenizeStructure(structurePart, lineNumber, diagnostics);
+        if (tokens.length === 0) {
+            return null;
+        }
+        const expression = new ExpressionParser(tokens).parseRoot();
+        recordDeclarations(expression, lineNumber, { value: 0 }, templates, templateOrder);
+        const names = new Set();
+        collectEntityNames(expression, names);
+        for (const name of names) {
+            ensureTemplate(templates, templateOrder, name, lineNumber);
+        }
+        return {
+            kind: "structure",
+            line: lineNumber,
+            raw: structurePart,
+            topLevelEntities: topLevelEntities(expression),
+            expression,
+        };
+    }
+    catch (error) {
+        diagnostics.push({
+            level: "error",
+            line: lineNumber,
+            message: error instanceof Error ? error.message : "Structure parse failed",
+        });
+        return null;
+    }
+}
+function parse(source) {
+    const templates = {};
+    const templateOrder = [];
+    const diagnostics = [];
+    const statements = [];
+    const lines = source.split(/\r?\n/);
+    lines.forEach((rawLine, index) => {
+        const lineNumber = index + 1;
+        const line = rawLine.trim();
+        if (!line) {
+            return;
+        }
+        // Leading `Name:` anchor = an entity-level style declaration; whatever
+        // follows it (if anything) is a structure expression on the same line.
+        const leadingAnchor = LEADING_ANCHOR_RE.exec(line);
+        let structurePart = line;
+        if (leadingAnchor) {
+            const name = leadingAnchor[1];
+            const { tokens, end } = scanStyleChunk(line, leadingAnchor[0].length);
+            const template = ensureTemplate(templates, templateOrder, name, lineNumber);
+            for (const token of tokens) {
+                const resolved = (0, style_1.resolveStyleToken)(token);
+                if (!resolved) {
+                    diagnostics.push({
+                        level: "warning",
+                        line: lineNumber,
+                        message: `Unsupported style token: ${token}`,
+                    });
+                    continue;
+                }
+                for (const item of resolved) {
+                    template.styles[item.key] = item.value;
+                }
+            }
+            statements.push({
+                kind: "style",
+                line: lineNumber,
+                raw: line,
+                entity: name,
+                tokens,
+            });
+            const rest = line.slice(end);
+            // A trailing structure after the anchor continues from the anchored
+            // entity itself: `A: bg #fda/Footer` ≡ style(A) + structure `A / Footer`.
+            structurePart = rest.trim() ? name + rest : "";
+        }
+        const trimmed = structurePart.trim();
+        if (!trimmed) {
+            return;
+        }
+        const statement = parseStructureLine(trimmed, lineNumber, templates, templateOrder, diagnostics);
+        if (statement) {
+            statements.push(statement);
+        }
+    });
+    for (const name of templateOrder) {
+        const template = templates[name];
+        if (template.interiorDeclarations.length >= 2) {
+            const lineNumbers = template.interiorDeclarations
+                .map((declaration) => declaration.line)
+                .join("、");
+            diagnostics.push({
+                level: "warning",
+                line: template.firstDefinedLine,
+                message: `${name} 的内部结构被声明 ${template.interiorDeclarations.length} 次` +
+                    `（第 ${lineNumbers} 行），按行序后者生效；同行内的声明按书写位置各自呈现`,
+            });
+        }
+    }
+    return {
+        source,
+        statements,
+        templates,
+        templateOrder,
+        diagnostics,
+    };
+}
+//# sourceMappingURL=parser.js.map
+});
+
+__define("./compile", function (module, exports, require) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.compile = compile;
+exports.parseAndCompile = parseAndCompile;
+const parser_1 = require("./parser");
+/**
+ * Content resolution for a container occurrence (position has written interior):
+ * a declaration from a LATER line overrides the written interior (cross-line
+ * override may reach into a scene line); otherwise the written interior applies
+ * as written (same-line declarations are parallel and never override it).
+ */
+function resolveContainerContent(name, written, sceneLine, document) {
+    const later = lastDeclarationAfter(name, sceneLine, document);
+    return later ? later.content : written;
+}
+/**
+ * Content resolution for a bare occurrence: the latest declaration from a LATER
+ * line wins; otherwise the latest declaration from an EARLIER line (same-line
+ * written interiors never leak into bare sibling positions); otherwise empty.
+ */
+function resolveBareContent(name, sceneLine, document) {
+    const later = lastDeclarationAfter(name, sceneLine, document);
+    if (later) {
+        return later.content;
+    }
+    const template = document.templates[name];
+    if (!template) {
+        return null;
+    }
+    const earlier = template.interiorDeclarations.filter((declaration) => declaration.line < sceneLine);
+    if (earlier.length > 0) {
+        return earlier[earlier.length - 1].content;
+    }
+    return null;
+}
+function lastDeclarationAfter(name, sceneLine, document) {
+    const template = document.templates[name];
+    if (!template) {
+        return null;
+    }
+    const later = template.interiorDeclarations.filter((declaration) => declaration.line > sceneLine);
+    if (later.length > 0) {
+        return later[later.length - 1];
+    }
+    return null;
+}
+function mergeStyles(template, inlineStyles) {
+    const styles = { ...(template?.styles ?? {}) };
+    for (const pair of inlineStyles ?? []) {
+        styles[pair.key] = pair.value;
+    }
+    return styles;
+}
+function makeNode(name, inlineStyles, document, diagnostics, sequence) {
+    const id = `${name}_${sequence.value++}`;
+    const template = document.templates[name];
+    if (!template) {
+        diagnostics.push({
+            level: "error",
+            message: `Unknown template: ${name}`,
+        });
+        return { id, templateName: name, content: null, styles: {}, terminated: false };
+    }
+    return {
+        id,
+        templateName: name,
+        content: null,
+        styles: mergeStyles(template, inlineStyles),
+        terminated: false,
+    };
+}
+function makeTerminus(name, document, sequence) {
+    return {
+        id: `${name}_${sequence.value++}`,
+        templateName: name,
+        content: null,
+        styles: { ...(document.templates[name]?.styles ?? {}) },
+        terminated: true,
+    };
+}
+function expandExpr(expression, sceneLine, document, diagnostics, path, sequence) {
+    if (expression.kind === "group") {
+        return {
+            kind: "group",
+            direction: expression.direction,
+            children: expression.children.map((child) => expandExpr(child, sceneLine, document, diagnostics, path, sequence)),
+        };
+    }
+    if (expression.kind === "container") {
+        const node = makeNode(expression.name, expression.inlineStyles, document, diagnostics, sequence);
+        const content = resolveContainerContent(expression.name, expression.content, sceneLine, document);
+        path.push(expression.name);
+        node.content = content
+            ? expandExpr(content, sceneLine, document, diagnostics, path, sequence)
+            : null;
+        path.pop();
+        return { kind: "entity", node };
+    }
+    // Bare occurrence: recursion truncation check before fetching a definition.
+    if (path.includes(expression.name)) {
+        return { kind: "entity", node: makeTerminus(expression.name, document, sequence) };
+    }
+    const node = makeNode(expression.name, expression.inlineStyles, document, diagnostics, sequence);
+    const content = resolveBareContent(expression.name, sceneLine, document);
+    path.push(expression.name);
+    node.content = content
+        ? expandExpr(content, sceneLine, document, diagnostics, path, sequence)
+        : null;
+    path.pop();
+    return { kind: "entity", node };
+}
+function layoutToRootEntities(node) {
+    if (node.kind === "entity") {
+        return [node.node];
+    }
+    return node.children.flatMap((child) => layoutToRootEntities(child));
+}
+/**
+ * Scene selection (docs/parse-rule.md §4): process structure lines in document
+ * order; a line becomes a scene if any of its top-level subjects is unplaced; a
+ * multi-subject line whose subjects are all placed REPLACES the most recent scene
+ * sharing a subject; a single-subject line for a placed entity is declaration-only.
+ */
+function selectScenes(statements) {
+    const scenes = [];
+    const placed = new Set();
+    for (const statement of statements) {
+        const tops = statement.topLevelEntities;
+        const allPlaced = tops.every((name) => placed.has(name));
+        if (!allPlaced) {
+            scenes.push({ statement, tops });
+        }
+        else if (tops.length >= 2) {
+            let replaced = false;
+            for (let i = scenes.length - 1; i >= 0; i -= 1) {
+                if (scenes[i].tops.some((name) => tops.includes(name))) {
+                    scenes[i] = { statement, tops };
+                    replaced = true;
+                    break;
+                }
+            }
+            if (!replaced) {
+                scenes.push({ statement, tops });
+            }
+        }
+        collectEntityNames(statement.expression, placed);
+    }
+    return scenes;
+}
+function collectEntityNames(expression, out) {
+    if (expression.kind === "entity") {
+        out.add(expression.name);
+        return;
+    }
+    if (expression.kind === "container") {
+        out.add(expression.name);
+        collectEntityNames(expression.content, out);
+        return;
+    }
+    for (const child of expression.children) {
+        collectEntityNames(child, out);
+    }
+}
+function compile(source, options = {}) {
+    const document = (0, parser_1.parse)(source);
+    const diagnostics = [...document.diagnostics];
+    const mode = options.mode ?? "preview";
+    const sequence = { value: 1 };
+    const compileResult = {
+        mode,
+        document,
+        roots: [],
+        scenes: [],
+        sceneLineNumbers: [],
+        diagnostics,
+    };
+    const structureStatements = document.statements.filter((statement) => statement.kind === "structure");
+    if (structureStatements.length === 0) {
+        const requestedRoots = options.rootNames?.length
+            ? options.rootNames
+            : document.templateOrder.slice();
+        compileResult.roots = requestedRoots.map((name) => {
+            const node = makeNode(name, undefined, document, diagnostics, sequence);
+            const content = resolveBareContent(name, 0, document);
+            node.content = content
+                ? expandExpr(content, 0, document, diagnostics, [name], sequence)
+                : null;
+            return node;
+        });
+        compileResult.scenes = compileResult.roots.map((root) => ({
+            kind: "entity",
+            node: root,
+        }));
+        return compileResult;
+    }
+    const scenes = selectScenes(structureStatements);
+    compileResult.scenes = scenes.map((scene) => expandExpr(scene.statement.expression, scene.statement.line, document, diagnostics, [], sequence));
+    compileResult.sceneLineNumbers = scenes.map((scene) => scene.statement.line);
+    compileResult.roots = compileResult.scenes.flatMap((scene) => layoutToRootEntities(scene));
+    return compileResult;
+}
+function parseAndCompile(source, options = {}) {
+    return compile(source, options);
+}
+//# sourceMappingURL=compile.js.map
+});
+</script>
+<script>
+(function () {
+    "use strict";
+    var compile = __registry["./compile"].compile;
+    var resolveStyleToken = __registry["./style"].resolveStyleToken;
+
+    var EXAMPLES = {
+        quickstart:
+            "Header / Sidebar + Main [ Tabs / Content ] / Footer\n" +
+            "Content [Form / Preview]\n\n" +
+            "Main: bg #fda; 70;\n" +
+            "Tabs: label;\n" +
+            "Form: rd 4;",
+        revision:
+            "header / main [up + down] / footer\n" +
+            "main[good bad]\n" +
+            "header / main [left + right] / footer",
+        parallel:
+            "Row [ Col[Titles] + Col[Body] ]\n" +
+            "\n" +
+            "List [Item: bg #99f; Item Item]\n" +
+            "Item: bg #f99;",
+        circular:
+            "A[B]\n" +
+            "B[A]\n" +
+            "\n" +
+            "List[Item Item Item]"
+    };
+
+    var LEVEL_COLORS = ["#2563eb", "#7c3aed", "#059669", "#d97706", "#dc2626", "#0891b2"];
+    var DEFAULT_STYLES = {
+        border: "1px solid #cbd5e1",
+        padding: "8px",
+        margin: "6px",
+        "border-radius": "8px",
+        "background-color": "#ffffff"
+    };
+
+    var STRUCTURE_CHARS = "+/[]()";
+    var BARE_NAME_RE = /^[A-Za-z][A-Za-z0-9_]*$/;
+    var LEADING_ANCHOR_RE = /^([A-Za-z][A-Za-z0-9_]*)\s*:\s*/;
+
+    var sourceEl = document.getElementById("source");
+    var highlightCodeEl = document.getElementById("highlightCode");
+    var highlightPreEl = document.getElementById("highlight");
+    var renderEl = document.getElementById("render");
+    var diagEl = document.getElementById("diagnostics");
+
+    /* ---------------- 语法高亮（与 parser 相同的扫描规则） ---------------- */
+
+    function escapeHtml(text) {
+        return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    function span(cls, text) {
+        return '<span class="' + cls + '">' + escapeHtml(text) + "</span>";
+    }
+
+    function findStyleChunkEnd(source, start) {
+        var i = start;
+        while (i < source.length) {
+            var ch = source[i];
+            if (STRUCTURE_CHARS.indexOf(ch) >= 0) break;
+            if (ch === ";") {
+                var j = i + 1;
+                while (j < source.length && /\s/.test(source[j])) j += 1;
+                var k = j, seg = "";
+                while (k < source.length && STRUCTURE_CHARS.indexOf(source[k]) < 0 && source[k] !== ";") {
+                    seg += source[k];
+                    k += 1;
+                }
+                var words = seg.trim().split(/\s+/).filter(Boolean);
+                var allNames = words.length > 0 && words.every(function (w) { return BARE_NAME_RE.test(w); });
+                if (allNames) return i + 1;
+            }
+            i += 1;
+        }
+        return i;
+    }
+
+    function styleSegments(source, start, end) {
+        var segs = [];
+        var segStart = start;
+        for (var i = start; i <= end; i += 1) {
+            if (i === end || source[i] === ";") {
+                var text = source.slice(segStart, i);
+                if (text.trim()) segs.push({ text: text, start: segStart, end: i });
+                segStart = i + 1;
+            }
+        }
+        return segs;
+    }
+
+    function tokenKeys(token) {
+        var resolved = resolveStyleToken(token) || [];
+        return resolved.map(function (item) { return item.key; });
+    }
+
+    /* 逐行高亮上下文：场景行、每行容器声明（含 dead 标记）、样式行死属性 */
+    function buildContext(result) {
+        var doc = result.document;
+        var sceneLines = {};
+        result.sceneLineNumbers.forEach(function (line) { sceneLines[line] = true; });
+
+        var maxDeclLine = {};
+        Object.keys(doc.templates).forEach(function (name) {
+            var max = 0;
+            doc.templates[name].interiorDeclarations.forEach(function (d) {
+                if (d.line > max) max = d.line;
+            });
+            maxDeclLine[name] = max;
+        });
+
+        var containersByLine = {};
+        doc.statements.forEach(function (st) {
+            if (st.kind !== "structure") return;
+            var list = [];
+            (function walk(expr) {
+                if (expr.kind === "container") {
+                    list.push({
+                        name: expr.name,
+                        dead: st.line < maxDeclLine[expr.name]
+                    });
+                    walk(expr.content);
+                } else if (expr.kind === "group") {
+                    expr.children.forEach(walk);
+                }
+            })(st.expression);
+            containersByLine[st.line] = list;
+        });
+
+        var styleLines = {};
+        var laterKeysByEntity = {};
+        var styleStatements = doc.statements.filter(function (s) { return s.kind === "style"; });
+        for (var i = styleStatements.length - 1; i >= 0; i -= 1) {
+            var st = styleStatements[i];
+            var keys = {};
+            st.tokens.forEach(function (token) {
+                tokenKeys(token).forEach(function (key) { keys[key] = true; });
+            });
+            var deadKeys = {};
+            var later = laterKeysByEntity[st.entity];
+            if (later) {
+                Object.keys(later).forEach(function (key) {
+                    if (keys[key]) deadKeys[key] = true;
+                });
+            }
+            styleLines[st.line] = { entity: st.entity, deadKeys: deadKeys };
+            var acc = laterKeysByEntity[st.entity];
+            if (!acc) { acc = {}; laterKeysByEntity[st.entity] = acc; }
+            Object.keys(keys).forEach(function (key) { acc[key] = true; });
+        }
+
+        return { sceneLines: sceneLines, containersByLine: containersByLine, styleLines: styleLines };
+    }
+
+    function emitStyleSegments(source, start, end, deadKeys) {
+        var html = "";
+        styleSegments(source, start, end).forEach(function (seg, index, all) {
+            var keys = tokenKeys(seg.text);
+            var dead = keys.length > 0 && keys.every(function (key) { return deadKeys[key]; });
+            html += span(dead ? "tok-style dead" : "tok-style", seg.text);
+            if (index < all.length - 1 && source[seg.end] === ";") {
+                html += span("tok-sep", ";");
+            }
+        });
+        return html;
+    }
+
+    function highlightStructure(source, start, end, ctx, lineNumber) {
+        var html = "";
+        var containers = ctx.containersByLine[lineNumber] || [];
+        var containerIndex = 0;
+        var i = start;
+        while (i < end) {
+            var ch = source[i];
+            if (/\s/.test(ch)) { html += escapeHtml(ch); i += 1; continue; }
+            if (STRUCTURE_CHARS.indexOf(ch) >= 0) { html += span("tok-op", ch); i += 1; continue; }
+            if (!/^[A-Za-z]$/.test(ch)) { html += escapeHtml(ch); i += 1; continue; }
+
+            var nameStart = i;
+            i += 1;
+            while (i < end && /[A-Za-z0-9_]/.test(source[i])) i += 1;
+            var name = source.slice(nameStart, i);
+
+            var probe = i;
+            while (probe < end && /\s/.test(source[probe])) probe += 1;
+            if (source[probe] === ":") {
+                // 行内样式锚点：实例级样式，永远生效
+                html += span("tok-name", name);
+                html += span("tok-colon", source.slice(i, probe + 1));
+                var anchorEnd = findStyleChunkEnd(source, probe + 1);
+                html += emitStyleSegments(source, probe + 1, anchorEnd, {});
+                i = anchorEnd;
+                continue;
+            }
+            if (source[i] === "[") {
+                var depth = 0, close = i;
+                for (; close < end; close += 1) {
+                    if (source[close] === "[") depth += 1;
+                    else if (source[close] === "]") {
+                        depth -= 1;
+                        if (depth === 0) { close += 1; break; }
+                    }
+                }
+                var info = containers[containerIndex] || { dead: false };
+                containerIndex += 1;
+                html += span(info.dead ? "tok-name dead" : "tok-name", source.slice(nameStart, close));
+                i = close;
+                continue;
+            }
+            html += span("tok-name", name);
+        }
+        return html;
+    }
+
+    function highlightLine(source, lineNumber, ctx) {
+        var line = source.split("\n")[lineNumber - 1];
+        if (line === undefined || line.trim() === "") return "";
+
+        var isStructureLine = Object.prototype.hasOwnProperty.call(ctx.containersByLine, lineNumber);
+        var styleInfo = ctx.styleLines[lineNumber];
+        var isSceneLine = !!ctx.sceneLines[lineNumber];
+
+        var html = "";
+        var structureStart = 0;
+
+        var leadingAnchor = LEADING_ANCHOR_RE.exec(line);
+        if (leadingAnchor) {
+            var anchorEnd = leadingAnchor[0].length;
+            var chunkEnd = findStyleChunkEnd(line, anchorEnd);
+            var deadKeys = styleInfo ? styleInfo.deadKeys : {};
+            html += span("tok-name", leadingAnchor[1]);
+            html += span("tok-colon", line.slice(leadingAnchor[1].length, anchorEnd));
+            html += emitStyleSegments(line, anchorEnd, chunkEnd, deadKeys);
+            structureStart = chunkEnd;
+            isStructureLine = Object.prototype.hasOwnProperty.call(ctx.containersByLine, lineNumber);
+        } else if (!isStructureLine && !styleInfo) {
+            return span("tok-plain", line);
+        }
+
+        if (!isStructureLine) {
+            // 纯样式行到此结束
+            return html;
+        }
+
+        var containersList = ctx.containersByLine[lineNumber] || [];
+        var allDead = containersList.length > 0 && containersList.every(function (c) { return c.dead; });
+        var wholeDead = !isSceneLine && !leadingAnchor && (containersList.length === 0 || allDead);
+
+        if (wholeDead) {
+            return span("dead", line);
+        }
+        html += highlightStructure(line, structureStart, line.length, ctx, lineNumber);
+        return html;
+    }
+
+    function refreshHighlight(result) {
+        var ctx = buildContext(result);
+        var source = sourceEl.value;
+        var lines = source.split("\n").map(function (_line, idx) {
+            return highlightLine(source, idx + 1, ctx);
+        });
+        highlightCodeEl.innerHTML = lines.join("\n") + "\n";
+        syncScroll();
+    }
+
+    function syncScroll() {
+        highlightPreEl.scrollTop = sourceEl.scrollTop;
+        highlightPreEl.scrollLeft = sourceEl.scrollLeft;
+    }
+
+    /* ---------------- 右侧渲染 ---------------- */
+
+    function applyStyles(el, styles) {
+        for (var key in styles) {
+            if (Object.prototype.hasOwnProperty.call(styles, key)) {
+                el.style.setProperty(key, styles[key]);
+            }
+        }
+    }
+
+    function renderNode(node, level) {
+        var div = document.createElement("div");
+        div.className = "lm-node";
+        var styles = {};
+        var key;
+        for (key in DEFAULT_STYLES) {
+            if (Object.prototype.hasOwnProperty.call(DEFAULT_STYLES, key)) styles[key] = DEFAULT_STYLES[key];
+        }
+        styles.border = "1px solid " + LEVEL_COLORS[level % LEVEL_COLORS.length];
+        for (key in node.styles) {
+            if (Object.prototype.hasOwnProperty.call(node.styles, key)) styles[key] = node.styles[key];
+        }
+        applyStyles(div, styles);
+        var label = document.createElement("div");
+        label.className = "lm-label";
+        label.textContent = node.templateName + (node.terminated ? " (Terminus)" : "");
+        div.appendChild(label);
+        if (node.content) {
+            div.appendChild(renderLayout(node.content, level + 1));
+        }
+        return div;
+    }
+
+    function renderLayout(layout, level) {
+        if (layout.kind === "entity") {
+            return renderNode(layout.node, level);
+        }
+        var div = document.createElement("div");
+        div.style.setProperty("display", "flex");
+        div.style.setProperty("flex-direction", layout.direction === "row" ? "row" : "column");
+        div.style.setProperty("gap", "6px");
+        div.style.setProperty("align-items", "stretch");
+        for (var i = 0; i < layout.children.length; i += 1) {
+            div.appendChild(renderLayout(layout.children[i], level));
+        }
+        return div;
+    }
+
+    function renderDiagnostics(diagnostics) {
+        diagEl.innerHTML = "";
+        if (diagnostics.length === 0) return;
+        var box = document.createElement("div");
+        var hasError = false;
+        for (var i = 0; i < diagnostics.length; i += 1) {
+            var d = diagnostics[i];
+            if (d.level === "error") hasError = true;
+            var p = document.createElement("div");
+            p.textContent = "[" + (d.level === "error" ? "错误" : "警告") + "]" +
+                (d.line ? " 第 " + d.line + " 行：" : " ") + d.message;
+            box.appendChild(p);
+        }
+        box.className = "diags" + (hasError ? " has-error" : "");
+        diagEl.appendChild(box);
+    }
+
+    function render() {
+        var result;
+        try {
+            result = compile(sourceEl.value, { mode: "preview" });
+        } catch (err) {
+            renderDiagnostics([{ level: "error", message: "编译器异常：" + (err && err.message ? err.message : String(err)) }]);
+            return;
+        }
+        renderDiagnostics(result.diagnostics);
+        refreshHighlight(result);
+        renderEl.innerHTML = "";
+        if (result.scenes.length === 0) {
+            var empty = document.createElement("p");
+            empty.className = "empty";
+            empty.innerHTML = "没有可渲染的场景：试着写一行结构，如 <code>A [ B / C ]</code>";
+            renderEl.appendChild(empty);
+            return;
+        }
+        for (var i = 0; i < result.scenes.length; i += 1) {
+            var section = document.createElement("section");
+            section.className = "lm-scene";
+            var tag = document.createElement("div");
+            tag.className = "lm-scene-tag";
+            tag.textContent = "场景 " + (i + 1);
+            section.appendChild(tag);
+            section.appendChild(renderLayout(result.scenes[i], 0));
+            renderEl.appendChild(section);
+        }
+    }
+
+    function debounce(fn, wait) {
+        var timer = null;
+        return function () {
+            if (timer) clearTimeout(timer);
+            timer = setTimeout(fn, wait);
+        };
+    }
+
+    sourceEl.addEventListener("input", debounce(render, 200));
+    sourceEl.addEventListener("scroll", syncScroll);
+    sourceEl.addEventListener("keydown", function (event) {
+        if (event.key === "Tab") {
+            event.preventDefault();
+            var start = sourceEl.selectionStart;
+            var end = sourceEl.selectionEnd;
+            sourceEl.value = sourceEl.value.slice(0, start) + "  " + sourceEl.value.slice(end);
+            sourceEl.selectionStart = sourceEl.selectionEnd = start + 2;
+            render();
+        }
+    });
+
+    var buttons = document.querySelectorAll("header button[data-example]");
+    for (var b = 0; b < buttons.length; b += 1) {
+        buttons[b].addEventListener("click", function (event) {
+            var name = event.target.getAttribute("data-example");
+            sourceEl.value = EXAMPLES[name];
+            render();
+        });
+    }
+
+    sourceEl.value = EXAMPLES.quickstart;
+    render();
+})();
+</script>
+</body>
+</html>
