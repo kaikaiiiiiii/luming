@@ -24,8 +24,8 @@ function escapeHtml(value: string): string {
         .replace(/'/g, "&#39;");
 }
 
-function renderRuntimeEntity(node: RuntimeNode, level: number): string {
-    const styles = {
+function renderRuntimeEntity(node: RuntimeNode, level: number, flexChild = false): string {
+    const styles: Record<string, string> = {
         ...{
             border: `1px solid ${levelBorderColor(level)}`,
             padding: "8px",
@@ -35,6 +35,11 @@ function renderRuntimeEntity(node: RuntimeNode, level: number): string {
         },
         ...node.styles,
     };
+    // `+` 水平组的子项默认横向等分；显式设置过 width / flex 的子项保留自己的设定。
+    if (flexChild && !Object.prototype.hasOwnProperty.call(node.styles, "width")
+        && !Object.prototype.hasOwnProperty.call(node.styles, "flex")) {
+        styles.flex = "1 1 0";
+    }
 
     const label = `<div class="luming-label">${escapeHtml(node.templateName)}${node.terminated ? " (Terminus)" : ""
         }</div>`;
@@ -43,13 +48,15 @@ function renderRuntimeEntity(node: RuntimeNode, level: number): string {
     return `<div class="luming-node level-${level}" style="${styleRecordToInline(styles)}">${label}${content}</div>`;
 }
 
-function renderLayoutNode(node: RuntimeLayoutNode, level: number): string {
+function renderLayoutNode(node: RuntimeLayoutNode, level: number, flexChild = false): string {
     if (node.kind === "entity") {
-        return renderRuntimeEntity(node.node, level);
+        return renderRuntimeEntity(node.node, level, flexChild);
     }
 
     const direction = node.direction === "row" ? "row" : "column";
-    const children = node.children.map((child) => renderLayoutNode(child, level)).join("");
+    const children = node.children
+        .map((child) => renderLayoutNode(child, level, node.direction === "row"))
+        .join("");
     return `<div class="luming-group" style="display:flex; flex-direction:${direction}; align-items:stretch; gap:6px;">${children}</div>`;
 }
 

@@ -364,7 +364,7 @@
         }
     }
 
-    function renderNode(node, level) {
+    function renderNode(node, level, flexChild) {
         var div = document.createElement("div");
         div.className = "lm-node";
         var styles = {};
@@ -376,28 +376,34 @@
         for (key in node.styles) {
             if (Object.prototype.hasOwnProperty.call(node.styles, key)) styles[key] = node.styles[key];
         }
+        // `+` 水平组的子项默认横向等分；显式设置过 width / flex 的子项保留自己的设定。
+        if (flexChild && !Object.prototype.hasOwnProperty.call(node.styles, "width")
+            && !Object.prototype.hasOwnProperty.call(node.styles, "flex")) {
+            styles.flex = "1 1 0";
+        }
         applyStyles(div, styles);
         var label = document.createElement("div");
         label.className = "lm-label";
         label.textContent = node.templateName + (node.terminated ? " (Terminus)" : "");
         div.appendChild(label);
         if (node.content) {
-            div.appendChild(renderLayout(node.content, level + 1));
+            div.appendChild(renderLayout(node.content, level + 1, false));
         }
         return div;
     }
 
-    function renderLayout(layout, level) {
+    function renderLayout(layout, level, flexChild) {
         if (layout.kind === "entity") {
-            return renderNode(layout.node, level);
+            return renderNode(layout.node, level, flexChild);
         }
+        var isRow = layout.direction === "row";
         var div = document.createElement("div");
         div.style.setProperty("display", "flex");
-        div.style.setProperty("flex-direction", layout.direction === "row" ? "row" : "column");
+        div.style.setProperty("flex-direction", isRow ? "row" : "column");
         div.style.setProperty("gap", "6px");
         div.style.setProperty("align-items", "stretch");
         for (var i = 0; i < layout.children.length; i += 1) {
-            div.appendChild(renderLayout(layout.children[i], level));
+            div.appendChild(renderLayout(layout.children[i], level, isRow));
         }
         return div;
     }
