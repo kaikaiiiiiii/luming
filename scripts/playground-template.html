@@ -25,7 +25,11 @@
         position: absolute; inset: 0; margin: 0; padding: 14px;
         font: 13px/1.7 Consolas, "Cascadia Mono", Menlo, monospace;
         white-space: pre; tab-size: 2;
+        font-variant-ligatures: none;
     }
+    /* 关键：<code> 会被 UA 样式重置为默认等宽字体（与 textarea 的字体宽度不同，
+       导致高亮层与光标错位），必须强制继承 pre 的字体 */
+    .editor-stack pre code { font: inherit; }
     .editor-stack pre { pointer-events: none; overflow: hidden; color: #e2e8f0; }
     .editor-stack textarea {
         background: transparent; color: transparent; caret-color: #38bdf8;
