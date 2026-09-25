@@ -16,10 +16,19 @@ function git(args, options = {}) {
     }).toString().trim();
 }
 
+/** Content-based clean check (ignores EOL phantom modifications). */
+function isDirty() {
+    try {
+        git("diff --quiet HEAD", { quiet: true });
+        return false;
+    } catch {
+        return true;
+    }
+}
+
 function main() {
-    const dirty = git("status --porcelain", { quiet: true });
-    if (dirty) {
-        console.error("Deploy aborted: working tree is not clean. Commit first.\n" + dirty);
+    if (isDirty()) {
+        console.error("Deploy aborted: working tree has uncommitted changes. Commit first.");
         process.exit(1);
     }
 
@@ -27,12 +36,10 @@ function main() {
     execSync("npm run build", { cwd: root, stdio: "inherit" });
     execSync("npm run playground", { cwd: root, stdio: "inherit" });
 
-    const stillDirty = git("status --porcelain", { quiet: true });
-    if (stillDirty) {
+    if (isDirty()) {
         console.error(
             "Deploy aborted: rebuild changed files that are not committed.\n" +
-            "Commit the rebuilt playground.html first (so the site matches the repo), then deploy again.\n" +
-            stillDirty
+            "Commit the rebuilt playground.html first (so the site matches the repo), then deploy again."
         );
         process.exit(1);
     }
@@ -44,6 +51,11 @@ function main() {
     try {
         git("worktree add " + JSON.stringify(TMP) + " gh-pages");
         worktreeAdded = true;
+        // gh-pages 分支上的行尾属性：index.html 固定 LF（与主仓库的生成产物一致）
+        const attrs = path.join(TMP, ".gitattributes");
+        if (!fs.existsSync(attrs)) {
+            fs.writeFileSync(attrs, "index.html text eol=lf\n");
+        }
         fs.copyFileSync(path.join(root, "playground.html"), path.join(TMP, "index.html"));
 
         if (!git("status --porcelain", { quiet: true, cwd: TMP })) {
@@ -51,6 +63,7 @@ function main() {
             return;
         }
         git("-C " + JSON.stringify(TMP) + " add index.html");
+        git("-C " + JSON.stringify(TMP) + " add .gitattributes");
         git("-C " + JSON.stringify(TMP) + ' commit -m "deploy: playground @ master ' + masterSha + '"');
         git("push origin gh-pages");
         console.log("Deployed to gh-pages (playground @ master " + masterSha + ").");
