@@ -55,6 +55,7 @@ src/
   index.ts          # re-export src 各模块
 docs/               # 文档：parse-rule.md（解析/合并/展开语义，定稿）、design-notes.md（裁决轨迹）、style.md
 examples/           # .luming 输入及各框架的生成产物
+changes.log         # 变动记录（[语法] / [工具] 两类，最新在上）
 scripts/            # playground 构建脚本与模板（生成单文件 playground.html）
 playground.html     # 单文件可交互预览页（浏览器直接打开；npm run playground 重新生成）
 ChagGPT-Luming_Lang_Design_Discuss.md # 本项目最初的需求、创意与头脑风暴讨论文档
@@ -63,6 +64,16 @@ ChagGPT-Luming_Lang_Design_Discuss.md # 本项目最初的需求、创意与头�
 处理流水线：`parse` -> `compile` -> `renderPreviewHtml` 或 `generateFiles`。
 每个阶段都是基于 `src/types.ts` 中类型的纯函数。
 
+## 变动记录（changes.log）
+
+- 仓库根目录的 `changes.log` 记录每一项变动，分两类标记：
+  - `[语法]` — 语言/语法本身的变动或增删（影响 `.luming` 的合法写法与语义）；
+  - `[工具]` — 工具链功能变动（编译器、CLI、playground、文档、部署等）。
+- 每次提交涉及语法或功能变动时，在 `changes.log` **顶部**追加一条（最新在上，
+  注明日期），两类可以同条混合时分开写清楚。
+- `[语法]` 变动必须先同步 `README.zh-CN.md` 与 `docs/parse-rule.md`（规范源），
+  再同步 `README.md` 与实现，并运行 `npm test` 维护验收矩阵。
+
 ## gh-pages 在线预览（部署约定）
 
 - `gh-pages` 分支 = GitHub Pages 站点，根目录仅一个 `index.html`（由 `playground.html`
@@ -70,7 +81,8 @@ ChagGPT-Luming_Lang_Design_Discuss.md # 本项目最初的需求、创意与头�
   分支 / 根目录，需在仓库 Settings → Pages 中开启一次）。
 - **每次语法更新或实质性改进后必须同步部署**，流程：
   1. `npm run build && npm test && npm run playground`；
-  2. 提交 master（确保重建后的 `playground.html` 已入库）；
+  2. 在 `changes.log` 顶部追加本次变动记录（见「变动记录」节），提交 master
+     （确保重建后的 `playground.html` 已入库）；
   3. `npm run deploy` —— 脚本会校验工作区干净、重建 playground，并用 `git worktree`
      在临时目录 `.gh-pages-tmp` 中把 `index.html` 提交到 gh-pages 分支后推送。
 - 部署脚本要求 master 工作区干净且重建无差异（保证线上与仓库严格一致）；

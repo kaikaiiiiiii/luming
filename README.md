@@ -142,38 +142,10 @@ import Content from './Content.vue';
 
 ...
 ```
-Or directly generate a skill file in the project directory for vibe coding:
-
-```text
----
-name: luming
-description: Write, edit, and debug .luming DSL files. Luming is a textual DSL for describing static page structures.
----
-
-# Luming DSL Core Syntax
-
-Entities are defined by names that start with a letter and may contain letters, numbers, and underscores.
-
-## Layout Operators
-- `/` — vertical stacking (A above B).
-- `+` — horizontal layout (A left of B).
-- `[]` — containment (B contains A and C: `B [ A / C ]`).
-- `()` — grouping / operator precedence (e.g. `A + (B / C)`).
-- Precedence: `[]` > `()` > `+` > `/`.
-
-## Styles
-- `Entity: bg #fda; 70;` — content between `:` and `;`; properties separated by `;`. Trailing `;` is optional at the end of a line.
-- Tokens: `bg <color>` (background-color), `rd <n>` (border-radius, px suffix auto-added), `tab` / `card` / `label` (preset class), a bare number or percent (width %), or `css-prop value` (e.g. `border 1px solid red`).
-
-## Compositional Syntax
-- The same entity may be defined across multiple lines; later definitions override earlier ones (styles merge per-property).
-- Same-name entities on one line are separate copies (e.g. `List [Item Item Item]`).
-- Implicit `+` inside `[]` is allowed when unambiguous: `A[B C]` == `A [ B + C ]`.
-
-## Rule Tolerance
-- Any number of spaces or tabs is treated as a single space; spaces around relationship operators are optional.
-- Circular inclusion is allowed but expanded finitely, stopping at a "terminus".
-```
+Or let your AI editor (agent) understand **Luming** directly: this project maintains
+a **luming skill** (a domain-knowledge file written for AI coding agents) and plans a
+CLI command to install it into any project, so agents can correctly write, edit, and
+debug `.luming` files — see [Integration Roadmap](#integration-roadmap) below.
 
 In the quick example, we defined a page structure containing Header, Sidebar, Main, and Footer. Inside Main, there are Tabs and Content, and Content further contains Form and Preview. With concise syntax, we can clearly express the page's hierarchical relationships and layout.
 
@@ -449,6 +421,36 @@ Note: Users can write complex interface structures using **Luming**, but since *
 
 Due to limitations inherent in HTML, **Luming** transforms certain specific component names when compiling and generating component files. For example, if you define an entity named `Header`, it might be transformed to `MyHeader` or another name during compilation to avoid conflicts with HTML's `<header>` tag. These transformation rules can be adjusted via configuration files to meet the needs of different projects. **Luming** does not use random strings for component names; it transforms them according to predefined rules to ensure the generated component names have a degree of readability and consistency. In complex projects, there is still a possibility that **Luming**'s automatically transformed component names might conflict with existing component names; it is recommended to manually adjust the configuration in such cases.
 
+# Integration Roadmap
+
+The following capabilities are planned (all TODO unless noted):
+
+## Skill Integration: install the luming skill into any project
+
+![TODO](./img/todo.svg)
+
+Edit and maintain a **luming skill** — a domain-knowledge file for AI coding agents
+(syntax cheat sheet, authoring conventions, debugging guidance) — with its canonical
+copy kept in this repository (e.g. `skill/SKILL.md`) as the single source of truth.
+`.opencode/skills/luming/SKILL.md` is an early version an agent wrote into its own
+tool directory; it will migrate back to the canonical location during implementation.
+
+Add a CLI command (e.g. `luming skill add [--tool <name>]`) that installs the skill
+into **any project** for agent-assisted development:
+
+* Each tool has its own install convention; the command copies the skill to the
+  target tool's conventional location: `.opencode/skills/luming/` (OpenCode),
+  `.claude/skills/luming/` (Claude Code), etc.;
+* Without `--tool`, it detects which tool directory already exists in the current
+  project and installs there by default;
+* Once installed, the AI editor loads the skill and can correctly write, edit, and
+  debug `.luming` files.
+
+> The original vision was "translate `.luming` into natural-language descriptions
+> and hand them to a chat AI to generate code". The skill approach hands the syntax
+> and conventions to the agent directly, completely — more reasonable and more
+> efficient, so it replaces the former.
+
 ## Markdown Integration
 
 ![TODO](./img/todo.svg)
@@ -458,6 +460,27 @@ Due to limitations inherent in HTML, **Luming** transforms certain specific comp
 Header / Sidebar + Main [ Tabs / Content [Form / Preview]] / Footer<br>
 &grave;&grave;&grave;
 </pre>
+
+## Style Shorthand Extensions
+
+![TODO](./img/todo.svg)
+
+On top of the existing shorthands (`bg`, `rd`) and preset classes
+(`tab`/`card`/`label`), gradually add shorthands for frequently used styles based
+on real-world usage. Candidate directions: borders (`bd`), shadows, spacing,
+font size/weight, width-height combos, etc. Add them one by one driven by actual
+pain points when drawing pages, keeping the rule that every shorthand must expand
+to valid CSS.
+
+## Theme Syntax
+
+![TODO](./img/todo.svg)
+
+Once the style shorthands are rich enough, attempt **Theme** syntax: declare a
+reusable style collection for a group of entities or a whole page — define once,
+reference everywhere — to unify colors and overall look. Design goal: support
+"swap one Theme, swap the whole look" without introducing selectors or scoping
+complexity.
 
 
 # About
