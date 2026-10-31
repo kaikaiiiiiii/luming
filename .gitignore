@@ -5,6 +5,7 @@ Thumbs.db
 # Logs
 logs
 *.log
+!changes.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

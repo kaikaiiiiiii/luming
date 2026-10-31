@@ -1,0 +1,40 @@
+# changes.log — 路明 变动记录
+
+每项变动记录于此，分两类标记：
+
+* `[语法]` — 语言/语法本身的变动或增删（影响 `.luming` 的合法写法与语义）；
+* `[工具]` — 工具链功能变动（编译器、CLI、playground、文档、部署等）。
+
+最新变动在最上面。
+
+---------------------------------------------------------------------
+
+## 2026-10-29
+
+* [工具] 开发时测试体系：tests/*.test.js（基于 node:test，零依赖；覆盖 parser
+  词法/文法/声明记录/诊断、style token、compile 语义与场景规则、renderer 预览
+  默认样式、generator 组件生成与名称转换、CLI 端到端）+ tests/semantics-matrix.js
+  16 项语义验收矩阵；npm test = 自动构建 + 全部测试，AGENTS.md 固化「改动即测试、
+  修 bug 先写复现用例」约定。
+
+* [工具] v0.1 语义定稿落地：重写 parser / compile（声明模型、场景选择、
+  路径栈截断），新增验收矩阵 tests/semantics-matrix.js（16 项，npm test）。
+* [语法] 语义定稿（选项二）：**同行并行**（同一行内的多次声明互不覆盖、按书写
+  位置呈现）、**跨行覆盖**（后行声明覆盖前行，可越过行内书面结构）；裸引用取
+  定义展开前检查祖先链，命中即成为终止节点（Terminus）；同行声明不入裸引用
+  回退池。
+* [语法] 行内样式锚点定为实例级：绑定最近的可修饰 Identifier，仅作用于该位置
+  的实例，优先于主体级样式；主体级样式维持按属性级联。
+* [工具] 新增诊断：同一主体内部结构被多次声明时输出 warning（列出声明行号）。
+* [工具] 新增单文件交互预览页 playground.html（scripts/build-playground.js 内嵌
+  dist 模块），带语法高亮、被覆盖声明置灰、实例修复（<code> 字体继承）。
+* [工具] 预览渲染新增默认样式：`+` 水平组子项横向等分（flex: 1 1 0；显式
+  width / flex 优先）。
+* [工具] gh-pages 部署管线：scripts/deploy-gh-pages.js + npm run deploy，线上
+  地址 https://kaikaiiiiiii.github.io/luming/（跳转 www.kaikai.men/luming/）；
+  AGENTS.md 固化部署约定。
+* [工具] README（中英）v0.1 定稿标注；docs/parse-rule.md 重写为实现级语义文档；
+  新增 docs/design-notes.md（裁决轨迹）、docs/rule-explains.md；移除已被取代的
+  docs/parser.md、docs/compiler.md。
+* [工具] README 新增「集成路线」章节（Skill 集成 / Markdown 集成 / 样式语法糖
+  扩展 / Theme 语法，均为 TODO）；删除旧的「生成 skill 文件」示例块。

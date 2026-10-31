@@ -27,7 +27,7 @@ npm run preview     # node dist/cli.js preview
 npm run generate    # node dist/cli.js generate
 npm run playground  # 由模板 + dist 模块重新生成单文件 playground.html
 npm run deploy      # 校验工作区干净 -> 重建 -> 将 playground.html 同步为 gh-pages 的 index.html 并推送
-npm test            # 运行 tests/semantics-matrix.js（16 项语义验收矩阵，需先 npm run build）
+npm test            # 自动先构建，然后运行 tests/*.test.js 全部测试与 tests/semantics-matrix.js（16 项语义验收矩阵）
 ```
 
 CLI 用法（构建后）：
@@ -96,6 +96,19 @@ ChagGPT-Luming_Lang_Design_Discuss.md # 本项目最初的需求、创意与头�
 - 导出的 API 统一通过 `src/index.ts` / `index.ts` 聚合。
 - 遵循现有 parser/compiler 的风格：单一职责的小工具函数，基于 `src/types.ts` 中的类型进行操作。
 - 诊断信息以 `Diagnostic[]` 形式收集在 `ParsedDocument` / `CompileResult` 上；编译器本体对可恢复的用户输入问题不要抛异常（CLI 会捕获抛出的错误并打印）。
+
+## 开发与测试
+
+- **改动代码后必须运行 `npm test`**（自动先 `npm run build`，再执行 `tests/*.test.js`
+  全部测试与 `tests/semantics-matrix.js` 语义验收矩阵；类型错误或任何用例失败都会
+  以非零码退出）。
+- 测试布局：`tests/parser.test.js`（词法/文法/声明记录/诊断）、`tests/style.test.js`
+  （样式 token）、`tests/compile.test.js`（语义与场景规则）、`tests/render.test.js`
+  （预览 HTML 与默认样式）、`tests/generator.test.js`（组件生成与名称转换）、
+  `tests/cli.test.js`（CLI 端到端）；`tests/semantics-matrix.js` 是可独立运行的
+  16 项语义验收矩阵。测试运行在 `dist/` 编译产物上（pretest 自动构建）。
+- **新语法、新行为、修 bug 必须同步补用例**：语义类进 `semantics-matrix.js`，
+  单元/集成类进对应的 `*.test.js`；修 bug 时先写复现用例再修。
 
 ## Luming DSL 速查表
 
