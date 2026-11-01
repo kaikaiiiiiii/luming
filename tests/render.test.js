@@ -20,6 +20,25 @@ test("preview keeps explicit width and equal-divides the remaining row child", (
     assert.equal(html.split("flex: 1 1 0").length - 1, 1, "only Sidebar should flex");
 });
 
+test("Fluent 2 defaults: medium corner, elevation shadow, brand level color", () => {
+    const html = renderPreviewHtml(compile(QUICKSTART, { mode: "preview" }));
+    assert.ok(html.includes("border-radius: 8px;"), "Fluent medium corner radius");
+    assert.ok(html.includes("box-shadow: 0 1px 2px rgba(0, 0, 0, 0.14), 0 0 2px rgba(0, 0, 0, 0.12);"),
+        "Fluent elevation-4 shadow");
+    assert.ok(html.includes("border: 1px solid #0F6CBD;"), "level 0 uses the Fluent brand color");
+    assert.ok(html.includes('"Segoe UI"'), "page uses Segoe UI");
+    assert.ok(html.includes("background: #fafafa;"), "Fluent neutral page background");
+    assert.ok(html.includes("color: #616161;"), "labels use Fluent secondary text color");
+});
+
+test("user styles override the Fluent defaults (preset card provides its own shadow)", () => {
+    const html = renderPreviewHtml(compile("Panel: card;", { mode: "preview" }));
+    assert.ok(html.includes("box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);"),
+        "card preset shadow wins over the default");
+    assert.ok(!html.includes("0 1px 2px rgba(0, 0, 0, 0.14)"),
+        "default shadow must not leak onto the styled entity");
+});
+
 test("preview marks terminus nodes", () => {
     const html = renderPreviewHtml(compile("A[B]\nB[A]", { mode: "preview" }));
     assert.ok(html.includes("(Terminus)"));

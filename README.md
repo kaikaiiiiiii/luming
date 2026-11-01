@@ -404,6 +404,7 @@ In preview mode, **Luming** will generate a single HTML document as much as poss
 
 * **Margins & Padding**: Entities have some default margins and padding to ensure content doesn't stick to the borders.
 * **Equal horizontal division**: Children in a `+` horizontal group split the remaining width equally by default (`flex: 1 1 0`); children with an explicit `width` or `flex` keep their own setting.
+* **Fluent 2 look**: The default visuals follow Microsoft's Fluent 2 design language — level colors come from the Fluent 2 shared palette (brand blue, purple, green, orange, red, teal), entities use the 8px medium corner radius and the layered Fluent elevation-4 shadow, and the page renders in Segoe UI. Explicitly specified styles still take priority over these defaults.
 
 * **Entity Names**: The name of each entity is displayed inside it for easy identification in the preview.
 

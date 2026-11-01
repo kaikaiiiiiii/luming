@@ -1,7 +1,15 @@
 import { CompileResult, RuntimeLayoutNode, RuntimeNode } from "./types";
 
-/** Per-hierarchy-level border colors (README「使用 - 预览模式 - 层次与边框颜色」). */
-const LEVEL_COLORS = ["#2563eb", "#7c3aed", "#059669", "#d97706", "#dc2626", "#0891b2"];
+/**
+ * Default visual language: Microsoft Fluent 2.
+ * Per-hierarchy-level accent colors come from the Fluent 2 shared palette
+ * (brand blue, purple, green, orange, red, teal); surfaces use the Fluent
+ * medium corner radius and elevation-4 shadow; text uses Segoe UI.
+ */
+const LEVEL_COLORS = ["#0F6CBD", "#8661C5", "#12A15E", "#F7630C", "#C50F1F", "#00B7C3"];
+
+/** Fluent 2 elevation 4: layered, soft, directional. */
+const FLUENT_SHADOW = "0 1px 2px rgba(0, 0, 0, 0.14), 0 0 2px rgba(0, 0, 0, 0.12)";
 
 function levelBorderColor(level: number): string {
     return LEVEL_COLORS[level % LEVEL_COLORS.length];
@@ -32,6 +40,7 @@ function renderRuntimeEntity(node: RuntimeNode, level: number, flexChild = false
             margin: "6px",
             "border-radius": "8px",
             "background-color": "#ffffff",
+            "box-shadow": FLUENT_SHADOW,
         },
         ...node.styles,
     };
@@ -76,8 +85,8 @@ export function renderPreviewHtml(result: CompileResult): string {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Luming Preview</title>
     <style>
-      body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 16px; background: #f8fafc; }
-      .luming-label { font-size: 12px; color: #334155; margin-bottom: 6px; font-weight: 600; }
+      body { font-family: "Segoe UI", "Segoe UI Web (West European)", -apple-system, BlinkMacSystemFont, sans-serif; margin: 16px; background: #fafafa; color: #242424; }
+      .luming-label { font-size: 12px; color: #616161; margin-bottom: 6px; font-weight: 600; }
       .luming-scene { margin-bottom: 12px; }
       .luming-diags { background: #fff7ed; border: 1px solid #fdba74; border-radius: 8px; padding: 10px 14px; }
       .luming-diags h2 { margin: 0 0 8px; font-size: 14px; }

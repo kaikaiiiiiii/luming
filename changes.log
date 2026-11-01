@@ -11,6 +11,12 @@
 
 ## 2026-10-29
 
+* [工具] 预览默认观感对齐 Microsoft Fluent 2：层级色改用 Fluent 2 共享调色板
+  （#0F6CBD 品牌蓝、紫、绿、橙、红、青轮换），主体默认 8px 圆角 + Fluent 分层
+  阴影（elevation 4），页面 Segoe UI 字体、#FAFAFA 中性底色、次级文字色标签；
+  playground 页面 chrome 同步（Fluent 控件按钮、错误诊断配色）。显式样式与
+  预置类仍优先于默认值；新增 Fluent 默认值测试。
+
 * [工具] 开发时测试体系：tests/*.test.js（基于 node:test，零依赖；覆盖 parser
   词法/文法/声明记录/诊断、style token、compile 语义与场景规则、renderer 预览
   默认样式、generator 组件生成与名称转换、CLI 端到端）+ tests/semantics-matrix.js

@@ -170,10 +170,12 @@ for stmt in structureStatements:
 
 ## 6. 输出层
 
-* **renderer.ts（预览模式）**：每个场景渲染为一段嵌套 flex 树；主体默认带层级配色
-  边框、内边距与名称标签（`Terminus` 追加标记）；`+` 水平组的子项默认
-  `flex: 1 1 0` **横向等分**（显式设置过 `width` / `flex` 的子项保留自己的设定）；
-  场景按序分段；诊断显示在页首。
+* **renderer.ts（预览模式）**：每个场景渲染为一段嵌套 flex 树；默认视觉采用
+  **Microsoft Fluent 2** 设计语言——主体带层级配色边框（Fluent 2 共享调色板：
+  品牌蓝 `#0F6CBD`、紫、绿、橙、红、青，逐层轮换）、8px 中号圆角、分层阴影
+  （elevation 4）、Segoe UI 字体与次级文字色标签（`Terminus` 追加标记）；
+  `+` 水平组的子项默认 `flex: 1 1 0` **横向等分**（显式设置过 `width` / `flex`
+  的子项保留自己的设定）；显式样式覆盖全部默认值；场景按序分段；诊断显示在页首。
 * **generator.ts（生成模式）**：凡出现在最终场景中的主体各生成一个组件文件
   （html / vue / react），组件内容 = 该主体**最后一条声明**的内部结构 + 合并样式；
   与 HTML 保留标签同名的主体加 `My` 前缀（`GeneratorConfig.componentRename` 可显式
