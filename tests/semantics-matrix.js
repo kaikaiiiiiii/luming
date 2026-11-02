@@ -64,13 +64,12 @@ case1("B[C]+C[B]", "B[C]\nC[B]", 1, [
 case1("list[item item item]+item[list]", "list [item item item]\nitem [list]", 1, [
     "list\n  (+)\n    item\n      list!\n    item\n      list!\n    item\n      list!",
 ]);
-// 6
-case1("Page/Main share Content, full copies", "Page [ Content ]\nMain [ Content ]\nContent [ Icon ]", 2, [
-    "Page\n  Content\n    Icon",
-    "Main\n  Content\n    Icon",
+// 6 — one page root, two full copies stacked vertically in document order
+case1("Page/Main share Content, one page with two full copies", "Page [ Content ]\nMain [ Content ]\nContent [ Icon ]", 1, [
+    "(/)\n  Page\n    Content\n      Icon\n  Main\n    Content\n      Icon",
 ]);
 // 7
-case1("A / B then A + B replaces scene", "A / B\nA + B", 1, [
+case1("A / B then A + B replaces the top-level unit", "A / B\nA + B", 1, [
     "(+)\n  A\n  B",
 ]);
 // 8

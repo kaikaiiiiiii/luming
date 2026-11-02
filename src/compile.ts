@@ -184,10 +184,11 @@ interface SceneEntry {
 }
 
 /**
- * Scene selection (docs/parse-rule.md §4): process structure lines in document
- * order; a line becomes a scene if any of its top-level subjects is unplaced; a
- * multi-subject line whose subjects are all placed REPLACES the most recent scene
- * sharing a subject; a single-subject line for a placed entity is declaration-only.
+ * Page composition (docs/parse-rule.md §4): process structure lines in document
+ * order; a line contributes a top-level unit if any of its top-level subjects is
+ * unplaced; a multi-subject line whose subjects are all placed REPLACES the most
+ * recent unit sharing a subject; a single-subject line for a placed entity is
+ * declaration-only. The surviving units compose the single page root.
  */
 function selectScenes(statements: StructureStatement[]): SceneEntry[] {
     const scenes: SceneEntry[] = [];
@@ -234,6 +235,19 @@ function collectEntityNames(expression: ExpressionNode, out: Set<string>): void 
     }
 }
 
+/** Wrap a list of top-level trees into the single page root: one tree passes
+ *  through; several disjoint units compose a vertical group (document order),
+ *  matching the natural top-down flow of an HTML document. */
+function composePageRoot(trees: RuntimeLayoutNode[]): RuntimeLayoutNode | null {
+    if (trees.length === 0) {
+        return null;
+    }
+    if (trees.length === 1) {
+        return trees[0];
+    }
+    return { kind: "group", direction: "column", children: trees };
+}
+
 export function compile(
     source: string,
     options: CompileOptions = {}
@@ -268,26 +282,33 @@ export function compile(
                 : null;
             return node;
         });
-        compileResult.scenes = compileResult.roots.map((root) => ({
-            kind: "entity",
-            node: root,
-        }));
+        const pageRoot = composePageRoot(
+            compileResult.roots.map((root) => ({ kind: "entity", node: root }))
+        );
+        compileResult.scenes = pageRoot ? [pageRoot] : [];
+        compileResult.sceneLineNumbers = [];
         return compileResult;
     }
 
-    const scenes = selectScenes(structureStatements);
-    compileResult.scenes = scenes.map((scene) =>
-        expandExpr(
-            scene.statement.expression,
-            scene.statement.line,
+    const units = selectScenes(structureStatements);
+    const expandedUnits = units.map((unit) => ({
+        tree: expandExpr(
+            unit.statement.expression,
+            unit.statement.line,
             document,
             diagnostics,
             [],
             sequence
-        )
-    );
-    compileResult.sceneLineNumbers = scenes.map((scene) => scene.statement.line);
-    compileResult.roots = compileResult.scenes.flatMap((scene) => layoutToRootEntities(scene));
+        ),
+        line: unit.statement.line,
+    }));
+
+    // One .luming document is exactly one page (docs/parse-rule.md §4):
+    // surviving top-level units compose the single page root in document order.
+    const pageRoot = composePageRoot(expandedUnits.map((unit) => unit.tree));
+    compileResult.scenes = pageRoot ? [pageRoot] : [];
+    compileResult.sceneLineNumbers = expandedUnits.map((unit) => unit.line);
+    compileResult.roots = pageRoot ? layoutToRootEntities(pageRoot) : [];
     return compileResult;
 }
 

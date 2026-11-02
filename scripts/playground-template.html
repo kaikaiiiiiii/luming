@@ -48,8 +48,7 @@
     .diags { background: #fff7ed; border: 1px solid #fdba74; border-radius: 8px; padding: 8px 12px; font-size: 12px; color: #9a3412; margin-bottom: 14px; }
     .diags.has-error { background: #fdf3f4; border-color: #c50f1f; color: #c50f1f; }
     .diags div { padding: 2px 0; }
-    .lm-scene { margin-bottom: 22px; }
-    .lm-scene-tag { font-size: 11px; color: #94a3b8; margin-bottom: 4px; }
+    .lm-page { margin-bottom: 22px; }
     .lm-node .lm-label { font-size: 12px; font-weight: 600; color: #616161; margin-bottom: 4px; }
     .empty { color: #94a3b8; font-size: 13px; }
     .empty code { background: #e2e8f0; border-radius: 4px; padding: 1px 6px; }
@@ -446,20 +445,15 @@
         if (result.scenes.length === 0) {
             var empty = document.createElement("p");
             empty.className = "empty";
-            empty.innerHTML = "没有可渲染的场景：试着写一行结构，如 <code>A [ B / C ]</code>";
+            empty.innerHTML = "没有可渲染的内容：试着写一行结构，如 <code>A [ B / C ]</code>";
             renderEl.appendChild(empty);
             return;
         }
-        for (var i = 0; i < result.scenes.length; i += 1) {
-            var section = document.createElement("section");
-            section.className = "lm-scene";
-            var tag = document.createElement("div");
-            tag.className = "lm-scene-tag";
-            tag.textContent = "场景 " + (i + 1);
-            section.appendChild(tag);
-            section.appendChild(renderLayout(result.scenes[i], 0));
-            renderEl.appendChild(section);
-        }
+        // 一份 .luming 文档就是一个页面：唯一根，不再区分场景
+        var page = document.createElement("section");
+        page.className = "lm-page";
+        page.appendChild(renderLayout(result.scenes[0], 0, false));
+        renderEl.appendChild(page);
     }
 
     function debounce(fn, wait) {

@@ -13,10 +13,9 @@ test("acceptance: recursion truncation family", () => {
     ]);
 });
 
-test("acceptance: shared entity produces full independent copies", () => {
+test("acceptance: shared entity produces full independent copies on one page", () => {
     assert.deepEqual(scenesOf("Page [ Content ]\nMain [ Content ]\nContent [ Icon ]"), [
-        "Page\n  Content\n    Icon",
-        "Main\n  Content\n    Icon",
+        "(/)\n  Page\n    Content\n      Icon\n  Main\n    Content\n      Icon",
     ]);
 });
 
@@ -52,12 +51,20 @@ test("scene selection: single-subject line for a placed entity is declaration-on
     ]);
 });
 
-test("scene selection: multi-subject line replaces the most recent scene sharing a subject", () => {
+test("page composition: surviving units compose the single page root in document order", () => {
     const result = compile("A [ X ]\nB [ Y ]\nA / B");
     assert.deepEqual(result.sceneLineNumbers, [1, 3]);
     assert.deepEqual(result.scenes.map((s) => dumpScene(s)), [
-        "A\n  X",
-        "(/)\n  A\n    X\n  B\n    Y",
+        "(/)\n  A\n    X\n  (/)\n    A\n      X\n    B\n      Y",
+    ]);
+    assert.equal(result.scenes.length, 1, "a document is exactly one page");
+});
+
+test("page composition: disjoint units flow vertically, never split into sections", () => {
+    const result = compile("Row [ Col[Titles] + Col[Body] ]\nList [Item Item Item]");
+    assert.equal(result.scenes.length, 1);
+    assert.deepEqual(result.scenes.map((s) => dumpScene(s)), [
+        "(/)\n  Row\n    (+)\n      Col\n        Titles\n      Col\n        Body\n  List\n    (+)\n      Item\n      Item\n      Item",
     ]);
 });
 
