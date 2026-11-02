@@ -48,8 +48,7 @@
     .diags { background: #fff7ed; border: 1px solid #fdba74; border-radius: 8px; padding: 8px 12px; font-size: 12px; color: #9a3412; margin-bottom: 14px; }
     .diags.has-error { background: #fdf3f4; border-color: #c50f1f; color: #c50f1f; }
     .diags div { padding: 2px 0; }
-    .lm-scene { margin-bottom: 22px; }
-    .lm-scene-tag { font-size: 11px; color: #94a3b8; margin-bottom: 4px; }
+    .lm-page { margin-bottom: 22px; }
     .lm-node .lm-label { font-size: 12px; font-weight: 600; color: #616161; margin-bottom: 4px; }
     .empty { color: #94a3b8; font-size: 13px; }
     .empty code { background: #e2e8f0; border-radius: 4px; padding: 1px 6px; }
@@ -719,10 +718,11 @@ function layoutToRootEntities(node) {
     return node.children.flatMap((child) => layoutToRootEntities(child));
 }
 /**
- * Scene selection (docs/parse-rule.md §4): process structure lines in document
- * order; a line becomes a scene if any of its top-level subjects is unplaced; a
- * multi-subject line whose subjects are all placed REPLACES the most recent scene
- * sharing a subject; a single-subject line for a placed entity is declaration-only.
+ * Page composition (docs/parse-rule.md §4): process structure lines in document
+ * order; a line contributes a top-level unit if any of its top-level subjects is
+ * unplaced; a multi-subject line whose subjects are all placed REPLACES the most
+ * recent unit sharing a subject; a single-subject line for a placed entity is
+ * declaration-only. The surviving units compose the single page root.
  */
 function selectScenes(statements) {
     const scenes = [];
@@ -764,6 +764,18 @@ function collectEntityNames(expression, out) {
         collectEntityNames(child, out);
     }
 }
+/** Wrap a list of top-level trees into the single page root: one tree passes
+ *  through; several disjoint units compose a vertical group (document order),
+ *  matching the natural top-down flow of an HTML document. */
+function composePageRoot(trees) {
+    if (trees.length === 0) {
+        return null;
+    }
+    if (trees.length === 1) {
+        return trees[0];
+    }
+    return { kind: "group", direction: "column", children: trees };
+}
 function compile(source, options = {}) {
     const document = (0, parser_1.parse)(source);
     const diagnostics = [...document.diagnostics];
@@ -790,16 +802,22 @@ function compile(source, options = {}) {
                 : null;
             return node;
         });
-        compileResult.scenes = compileResult.roots.map((root) => ({
-            kind: "entity",
-            node: root,
-        }));
+        const pageRoot = composePageRoot(compileResult.roots.map((root) => ({ kind: "entity", node: root })));
+        compileResult.scenes = pageRoot ? [pageRoot] : [];
+        compileResult.sceneLineNumbers = [];
         return compileResult;
     }
-    const scenes = selectScenes(structureStatements);
-    compileResult.scenes = scenes.map((scene) => expandExpr(scene.statement.expression, scene.statement.line, document, diagnostics, [], sequence));
-    compileResult.sceneLineNumbers = scenes.map((scene) => scene.statement.line);
-    compileResult.roots = compileResult.scenes.flatMap((scene) => layoutToRootEntities(scene));
+    const units = selectScenes(structureStatements);
+    const expandedUnits = units.map((unit) => ({
+        tree: expandExpr(unit.statement.expression, unit.statement.line, document, diagnostics, [], sequence),
+        line: unit.statement.line,
+    }));
+    // One .luming document is exactly one page (docs/parse-rule.md §4):
+    // surviving top-level units compose the single page root in document order.
+    const pageRoot = composePageRoot(expandedUnits.map((unit) => unit.tree));
+    compileResult.scenes = pageRoot ? [pageRoot] : [];
+    compileResult.sceneLineNumbers = expandedUnits.map((unit) => unit.line);
+    compileResult.roots = pageRoot ? layoutToRootEntities(pageRoot) : [];
     return compileResult;
 }
 function parseAndCompile(source, options = {}) {
@@ -1167,20 +1185,15 @@ function parseAndCompile(source, options = {}) {
         if (result.scenes.length === 0) {
             var empty = document.createElement("p");
             empty.className = "empty";
-            empty.innerHTML = "没有可渲染的场景：试着写一行结构，如 <code>A [ B / C ]</code>";
+            empty.innerHTML = "没有可渲染的内容：试着写一行结构，如 <code>A [ B / C ]</code>";
             renderEl.appendChild(empty);
             return;
         }
-        for (var i = 0; i < result.scenes.length; i += 1) {
-            var section = document.createElement("section");
-            section.className = "lm-scene";
-            var tag = document.createElement("div");
-            tag.className = "lm-scene-tag";
-            tag.textContent = "场景 " + (i + 1);
-            section.appendChild(tag);
-            section.appendChild(renderLayout(result.scenes[i], 0));
-            renderEl.appendChild(section);
-        }
+        // 一份 .luming 文档就是一个页面：唯一根，不再区分场景
+        var page = document.createElement("section");
+        page.className = "lm-page";
+        page.appendChild(renderLayout(result.scenes[0], 0, false));
+        renderEl.appendChild(page);
     }
 
     function debounce(fn, wait) {
