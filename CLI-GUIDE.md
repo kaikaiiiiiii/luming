@@ -2,6 +2,9 @@
 
 本项目已实现完整的 TypeScript CLI 工具，支持按 README 定义的 v0.1 语法进行解析、编译与输出。
 
+> 本文件是 CLI 速览；**权威用法、语法与退出码约定以 `README.zh-CN.md`（§使用）为准**，
+> 出口诊断明细见 `docs/parse-rule.md` §6。
+
 ---
 
 ## 快速开始
@@ -57,6 +60,13 @@ luming generate examples/quickstart.luming -o components --framework vue
 - `html`：基础 HTML + CSS
 - `vue`：Vue 3 SFC（`.vue`）
 - `react`：React TSX（`.tsx`）
+
+**配置：** `--config path`（默认读取当前目录的 `luming.config.json`）；字段
+`componentRename`（`Record<string, string>`，显式改名，优先级最高）与
+`reservedPrefix`（HTML 保留标签前缀，默认 `My`）。
+
+**诊断与退出码：** 诊断逐条打印到 stderr；仅有 warning 时退出码 `0`；出现 error 级诊断时
+产物仍会写出、退出码 `1`；参数或输入文件错误退出 `1`。
 
 ---
 

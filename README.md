@@ -248,6 +248,8 @@ Unlike arithmetic operators, there is no inherent rule in page layout that divis
 
 `: ;`: Content between `:` and `;` represents style modifications. For example: `A: bg #fda; 70;` means entity A has a background color of #fda and a width of 70%. Style properties are separated by semicolons. The style modification part starts with a colon and ends with a semicolon. Style properties can be complete CSS styles, or abbreviations or style classes provided by **Luming**'s presets.
 
+Paired parentheses inside a style value are part of the value, e.g. `bg rgba(0, 0, 0, 0.5)`, `width calc(100% - 20px)`, or `background url(https://example.com/a.png)`: characters such as `/`, `;`, and `+` inside the parentheses are never interpreted as structure operators. Outside the parentheses, `+` `/` `[` `]` still end the style area (so `A: bg #fda/Footer` means "style of A + structure A / Footer"), and an unmatched `)` also ends it (for groupings such as `(A: bg #fda; / B) + C`).
+
 **Luming**'s design goal is to quickly express and iterate on interface structures, not to replace professional design tools or generate high-fidelity design drafts. It primarily focuses on layout and hierarchical relationships, rather than detailed visual design. Nevertheless, **Luming** supports direct use of CSS styles and also offers some common CSS shorthand abbreviations and even several predefined CSS classes to save time. For a specific list, please refer to [the documentation](./docs/style.md).
 
 ## Compositional Syntax
@@ -421,6 +423,15 @@ Note: Users can write complex interface structures using **Luming**, but since *
 ## Generation-Time Transformation:
 
 Due to limitations inherent in HTML, **Luming** transforms certain specific component names when compiling and generating component files. For example, if you define an entity named `Header`, it might be transformed to `MyHeader` or another name during compilation to avoid conflicts with HTML's `<header>` tag. These transformation rules can be adjusted via configuration files to meet the needs of different projects. **Luming** does not use random strings for component names; it transforms them according to predefined rules to ensure the generated component names have a degree of readability and consistency. In complex projects, there is still a possibility that **Luming**'s automatically transformed component names might conflict with existing component names; it is recommended to manually adjust the configuration in such cases.
+
+## Diagnostics and Exit Codes
+
+Both preview and generate print parse/compile diagnostics to **standard error** (the preview HTML still embeds the diagnostic list):
+
+* Exit code `0`: success, or warnings only;
+* Exit code `1`: at least one `error`-level diagnostic (output files are still written for inspection), or a runtime error such as invalid arguments or a missing input file.
+
+A structure line that cannot be parsed is reported as an `error` (that line is skipped), and an unrecognized style token is a `warning` (that token is dropped), so scripts can decide whether the output is complete.
 
 # Integration Roadmap
 

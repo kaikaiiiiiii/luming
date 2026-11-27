@@ -193,18 +193,42 @@ function collapseGroup(direction: "row" | "column", nodes: ExpressionNode[]): Ex
     return { kind: "group", direction, children: flattened };
 }
 
+/** Characters that end a style chunk when they appear outside parentheses. */
+const STYLE_TERMINATOR_CHARS = new Set(["+", "/", "[", "]"]);
+
 /**
  * Scan a style chunk starting right after a `name:` anchor. The chunk ends at a
- * structure character, at end of line, or at a `;` whose following segment (up to
- * the next structure char / `;` / EOL) consists solely of bare entity names — that
- * `;` is the boundary between the style block and sibling entities
- * (e.g. `Item: bg #99f; Item Item`).
+ * top-level structure character (`+ / [ ]`), at an unmatched `)` that closes an
+ * enclosing group, or at end of line. Paired parentheses belong to the value
+ * (`rgba(...)`, `calc(...)`, `url(...)`), so characters inside them are value
+ * characters and a `;` inside parentheses never splits tokens. A `;` whose
+ * following segment (up to the next structure char / `;` / EOL) consists solely
+ * of bare entity names is the boundary between the style block and sibling
+ * entities (e.g. `Item: bg #99f; Item Item`).
  */
 function scanStyleChunk(source: string, start: number): { tokens: string[]; end: number } {
     let index = start;
+    let depth = 0;
     while (index < source.length) {
         const char = source[index];
-        if (STRUCTURE_CHARS.has(char)) {
+        if (char === "(") {
+            depth += 1;
+            index += 1;
+            continue;
+        }
+        if (char === ")") {
+            if (depth === 0) {
+                break;
+            }
+            depth -= 1;
+            index += 1;
+            continue;
+        }
+        if (depth > 0) {
+            index += 1;
+            continue;
+        }
+        if (STYLE_TERMINATOR_CHARS.has(char)) {
             break;
         }
         if (char === ";") {
@@ -212,12 +236,33 @@ function scanStyleChunk(source: string, start: number): { tokens: string[]; end:
             while (cursor < source.length && /\s/.test(source[cursor])) {
                 cursor += 1;
             }
+            // Look ahead for sibling entity names: parenthesized CSS values such as
+            // `calc(100% - 20px)` are scanned as content (so they are not mistaken
+            // for bare names); an unmatched `)` ends the segment.
             let segmentEnd = cursor;
-            while (
-                segmentEnd < source.length &&
-                !STRUCTURE_CHARS.has(source[segmentEnd]) &&
-                source[segmentEnd] !== ";"
-            ) {
+            let segmentDepth = 0;
+            while (segmentEnd < source.length) {
+                const segmentChar = source[segmentEnd];
+                if (segmentChar === "(") {
+                    segmentDepth += 1;
+                    segmentEnd += 1;
+                    continue;
+                }
+                if (segmentChar === ")") {
+                    if (segmentDepth === 0) {
+                        break;
+                    }
+                    segmentDepth -= 1;
+                    segmentEnd += 1;
+                    continue;
+                }
+                if (segmentDepth > 0) {
+                    segmentEnd += 1;
+                    continue;
+                }
+                if (STYLE_TERMINATOR_CHARS.has(segmentChar) || segmentChar === ";") {
+                    break;
+                }
                 segmentEnd += 1;
             }
             const words = source.slice(cursor, segmentEnd).trim().split(/\s+/).filter(Boolean);
@@ -231,11 +276,26 @@ function scanStyleChunk(source: string, start: number): { tokens: string[]; end:
     return { tokens: splitStyleTokens(source.slice(start, index)), end: index };
 }
 
+/** Split a style chunk on `;` at paren depth 0 (semicolons inside `(...)` are value chars). */
 function splitStyleTokens(chunk: string): string[] {
-    return chunk
-        .split(";")
-        .map((item) => item.trim())
-        .filter(Boolean);
+    const tokens: string[] = [];
+    let current = "";
+    let depth = 0;
+    for (const char of chunk) {
+        if (char === "(") {
+            depth += 1;
+        } else if (char === ")") {
+            depth = Math.max(0, depth - 1);
+        }
+        if (char === ";" && depth === 0) {
+            tokens.push(current.trim());
+            current = "";
+            continue;
+        }
+        current += char;
+    }
+    tokens.push(current.trim());
+    return tokens.filter(Boolean);
 }
 
 function resolveInlineStyles(

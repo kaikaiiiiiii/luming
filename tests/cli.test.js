@@ -1,6 +1,6 @@
 const { test } = require("node:test");
 const assert = require("node:assert");
-const { execSync } = require("node:child_process");
+const { execSync, spawnSync } = require("node:child_process");
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
@@ -88,4 +88,48 @@ test("cli reports a missing input file and exits non-zero", () => {
     const error = runFailing('preview "' + path.join(tmpdir("luming-cli-missing-"), "nope.luming") + '"');
     assert.notEqual(error.status, 0);
     assert.ok(String(error.stderr).includes("Input file not found"));
+});
+
+function runRaw(args, cwd) {
+    return spawnSync(process.execPath, [CLI, ...args], {
+        cwd: cwd || ROOT,
+        encoding: "utf8",
+    });
+}
+
+test("cli writes error diagnostics to stderr and exits 1", () => {
+    const dir = tmpdir("luming-cli-err-");
+    const input = path.join(dir, "bad.luming");
+    const out = path.join(dir, "out.html");
+    fs.writeFileSync(input, "A [ B", "utf8");
+
+    const result = runRaw(["preview", input, "-o", out]);
+    assert.equal(result.status, 1);
+    assert.ok(result.stderr.includes("[error]"));
+    assert.ok(result.stderr.includes("line 1"));
+    assert.ok(fs.existsSync(out), "preview output is still written for inspection");
+});
+
+test("cli generate also exits 1 when diagnostics contain errors", () => {
+    const dir = tmpdir("luming-cli-generr-");
+    const input = path.join(dir, "bad.luming");
+    const outDir = path.join(dir, "components");
+    fs.writeFileSync(input, "A [ B", "utf8");
+
+    const result = runRaw(["generate", input, "-o", outDir]);
+    assert.equal(result.status, 1);
+    assert.ok(result.stderr.includes("[error]"));
+    assert.ok(fs.existsSync(outDir));
+});
+
+test("cli keeps exit code 0 when diagnostics are warnings only", () => {
+    const dir = tmpdir("luming-cli-warn-");
+    const input = path.join(dir, "warn.luming");
+    const out = path.join(dir, "out.html");
+    fs.writeFileSync(input, "A: bg;", "utf8");
+
+    const result = runRaw(["preview", input, "-o", out]);
+    assert.equal(result.status, 0);
+    assert.ok(result.stderr.includes("[warning]"));
+    assert.ok(fs.existsSync(out));
 });

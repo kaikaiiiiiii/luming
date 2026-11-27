@@ -2,7 +2,14 @@
 
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { compile, generateFiles, GenerateFramework, GeneratorConfig, renderPreviewHtml } from "./src";
+import {
+    compile,
+    Diagnostic,
+    generateFiles,
+    GenerateFramework,
+    GeneratorConfig,
+    renderPreviewHtml,
+} from "./src";
 
 type ParsedArgs = {
     command: "preview" | "generate" | "help";
@@ -16,7 +23,9 @@ function printHelp(): void {
     process.stdout.write(`Luming CLI\n\n`);
     process.stdout.write(`Usage:\n`);
     process.stdout.write(`  luming preview <input.luming> [-o output.html]\n`);
-    process.stdout.write(`  luming generate <input.luming> [-o outdir] [--framework html|vue|react] [--config path]\n\n`);
+    process.stdout.write(`  luming generate <input.luming> [-o outdir] [-f html|vue|react] [--config path]\n\n`);
+    process.stdout.write(`Diagnostics go to stderr; an error-level diagnostic exits with code 1\n`);
+    process.stdout.write(`(outputs are still written), warnings alone exit with code 0.\n`);
 }
 
 /** Load the generator config (README「使用 - 生成时转换」): explicit --config path or luming.config.json in cwd. */
@@ -100,6 +109,19 @@ function ensureInput(inputFile: string | undefined): string {
     return absolute;
 }
 
+/**
+ * Print diagnostics to stderr and report whether any of them is an error.
+ * Warnings alone keep the exit code at 0; errors set it to 1
+ * (see README「使用 - 诊断与退出码」).
+ */
+function reportDiagnostics(diagnostics: Diagnostic[]): boolean {
+    for (const diagnostic of diagnostics) {
+        const location = diagnostic.line !== undefined ? `line ${diagnostic.line}: ` : "";
+        process.stderr.write(`${location}[${diagnostic.level}] ${diagnostic.message}\n`);
+    }
+    return diagnostics.some((diagnostic) => diagnostic.level === "error");
+}
+
 function runPreview(inputPath: string, output?: string): void {
     const source = fs.readFileSync(inputPath, "utf8");
     const result = compile(source, { mode: "preview" });
@@ -111,8 +133,12 @@ function runPreview(inputPath: string, output?: string): void {
     fs.writeFileSync(outputPath, html, "utf8");
 
     process.stdout.write(`Preview written: ${outputPath}\n`);
+    const hasErrors = reportDiagnostics(result.diagnostics);
     if (result.diagnostics.length > 0) {
-        process.stdout.write(`Diagnostics: ${result.diagnostics.length}\n`);
+        process.stdout.write(`Diagnostics: ${result.diagnostics.length} (see stderr)\n`);
+    }
+    if (hasErrors) {
+        process.exitCode = 1;
     }
 }
 
@@ -138,8 +164,12 @@ function runGenerate(
     }
 
     process.stdout.write(`Generated ${files.length} file(s) at: ${outDir}\n`);
+    const hasErrors = reportDiagnostics(result.diagnostics);
     if (result.diagnostics.length > 0) {
-        process.stdout.write(`Diagnostics: ${result.diagnostics.length}\n`);
+        process.stdout.write(`Diagnostics: ${result.diagnostics.length} (see stderr)\n`);
+    }
+    if (hasErrors) {
+        process.exitCode = 1;
     }
 }
 

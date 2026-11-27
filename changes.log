@@ -9,6 +9,24 @@
 
 ---------------------------------------------------------------------
 
+## 2026-11-27
+
+* [语法] 样式区放宽：样式值中的**成对圆括号**属于值本身，不再把 `(` `)` 当作样式区结束符
+  ——`bg rgba(0, 0, 0, 0.5)`、`width calc(100% - 20px)`、`background url(https://…)`、
+  `box-shadow 0 0 2px rgba(...)` 等可直接书写；括号内的 `/`、`;`、`+` 亦按值字符处理。
+  括号外的 `+` `/` `[` `]` 仍结束样式区，未配对的 `)` 仍结束样式区（`(A: bg red; / B) + C`
+  保持分组语义）；顶层样式值中的 `/` 仍是结构符（`font 12px/1.5` 暂不可写，见
+  docs/parse-rule.md §8）。规范同步 README.zh-CN / README / docs/parse-rule.md /
+  docs/style.md，新增 parser 用例（rgba / calc / url、括号分组、[] 内锚点兄弟）。
+* [工具] CLI 诊断与退出码：解析/编译诊断逐条打印到 **stderr**（预览 HTML 内仍附诊断
+  列表）；存在 error 级诊断时产物仍写出但退出码为 1，仅有 warning 时退出码 0；帮助
+  文本补充退出码说明，CLI-GUIDE 补充 --config 与退出码并标注 README 为权威；新增
+  cli 退出码用例。
+* [工具] `npm run clean` 改为跨平台实现（node `fs.rmSync`），修复 Windows 下
+  `rm -rf` 失败。
+* [工具] 清理陈旧产物：删除无源旧样例 `examples/circular2.preview.html` 与 README 旧
+  图示遗留的 6 个未引用 `img/*.svg`。
+
 ## 2026-11-02
 
 * [语法] 单页合成语义：一份 `.luming` 文档就是一个页面，编译输出**恰好一个页面根**。

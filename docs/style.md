@@ -51,3 +51,10 @@
     font-size: 12px;
 }
 ```
+
+## 样式值中的括号
+
+`bg`、`rd` 与任意 CSS 属性对的值都可以包含**成对圆括号**，例如
+`box-shadow 0 0 2px rgba(0, 0, 0, 0.2)`、`width calc(100% - 20px)`、
+`background url(https://example.com/a.png)`。括号内的 `/`、`;`、`+` 不会被当作结构符；
+括号外的 `/` 等仍是结构符（`font 12px/1.5` 暂不可写，见 `docs/parse-rule.md` §8）。

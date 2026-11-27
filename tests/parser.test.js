@@ -115,3 +115,38 @@ test("CRLF sources parse identically to LF", () => {
     assert.deepEqual(crlf.templateOrder, lf.templateOrder);
     assert.deepEqual(crlf.templates.Main.styles, lf.templates.Main.styles);
 });
+
+test("style values may contain paired parentheses (rgba / calc / url)", () => {
+    const doc = parse(
+        "A: bg rgba(0, 0, 0, 0.5); box-shadow 0 0 2px rgba(0, 0, 0, 0.2); width calc(100% / 2);\n" +
+        "B: background url(https://example.com/a.png);"
+    );
+    assert.deepEqual(doc.templates.A.styles, {
+        "background-color": "rgba(0, 0, 0, 0.5)",
+        "box-shadow": "0 0 2px rgba(0, 0, 0, 0.2)",
+        width: "calc(100% / 2)",
+    });
+    assert.deepEqual(doc.templates.B.styles, {
+        background: "url(https://example.com/a.png)",
+    });
+});
+
+test("an unmatched ) still closes a style chunk so grouping keeps working", () => {
+    assert.deepEqual(structuresOf("(Header: bg #fda; / Footer) + Sidebar"), [
+        "(row (column Header Footer) Sidebar)",
+    ]);
+    const doc = parse("(Header: bg #fda; / Footer) + Sidebar");
+    const header = doc.statements.find((s) => s.kind === "structure").expression
+        .children[0].children[0];
+    assert.deepEqual(header.inlineStyles, [{ key: "background-color", value: "#fda" }]);
+});
+
+test("inline anchor style with siblings still splits at ; inside []", () => {
+    assert.deepEqual(structuresOf("A [B: bg rgba(0, 0, 0, 0.5); C]"), ["A[(row B C)]"]);
+    const doc = parse("A [B: bg rgba(0, 0, 0, 0.5); C]");
+    const row = doc.statements.find((s) => s.kind === "structure").expression.content;
+    assert.deepEqual(row.children[0].inlineStyles, [
+        { key: "background-color", value: "rgba(0, 0, 0, 0.5)" },
+    ]);
+    assert.equal(row.children[1].inlineStyles, undefined);
+});

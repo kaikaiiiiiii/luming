@@ -58,13 +58,17 @@ interface StyleStatement    { kind: "style"; line: number; raw: string;
 
 正则 `^([A-Za-z][A-Za-z0-9_]*)\s*:\s*` 命中 → 冒号后进入样式区扫描 `scanStyleChunk`：
 
-* 扫描到**结构字符**（`+ / [ ] ( )`）或行尾 → 样式区结束；
+* 扫描到**结构字符**（`+ / [ ]`）或行尾 → 样式区结束；**未配对的 `)`** 同样结束样式区
+  （用于关闭外层 `()` 分组，如 `(A: bg #fda; / B) + C`）；
+* **成对圆括号**属于样式值：遇到 `(` 进入括号深度，括号内的 `+ / [ ] : ;` 等字符均按
+  值字符处理（`bg rgba(0, 0, 0, 0.5)`、`width calc(100% - 20px)`、`url(https://…)`），
+  配对的 `)` 使深度回到 0；
 * 扫描到 `;` 时向前看：若 `;` 之后到下一个结构符 / `;` / 行尾之间**全部是空格分隔的
   裸名称** → 该 `;` 是样式区与后续兄弟主体的分界
   （`List [Item: bg #99f; Item Item]` 依赖此规则）；
-* 样式区按 `;` 切分 token，每个 token 经 `resolveStyleToken`（§5）解析为 CSS 属性对，
-  **按属性合并**写入 `template.styles`（后行覆盖同名属性）；解析失败 → warning
-  「Unsupported style token」；
+* 样式区按 `;` 切分 token（同样按括号深度，括号内的 `;` 不切分），每个 token 经
+  `resolveStyleToken`（§5）解析为 CSS 属性对，**按属性合并**写入 `template.styles`
+  （后行覆盖同名属性）；解析失败 → warning「Unsupported style token」；
 * 样式区之后若还有内容 → 把锚点主体名**拼回**结构表达式
   （`A: bg #fda/Footer` ≡ 主体级样式声明 + 结构 `A / Footer`）；
   否则本行是纯样式行。
@@ -182,6 +186,10 @@ for stmt in structureStatements:
 
 无法解析的 token → warning 并丢弃。
 
+样式值中的**成对圆括号**整体属于值（括号内不按结构符切分），因此 `bg rgba(0, 0, 0, 0.5)`、
+`width calc(100% - 20px)`、`background url(https://…)` 均可直接书写；括号外的 `/` 等仍是
+结构符（`font 12px/1.5` 这类值暂不可写，见 §8）。
+
 作用域与优先级：
 
 1. **主体级**：前导锚点/纯样式行。按属性合并，行序后者覆盖前者。作用于全部实例。
@@ -201,10 +209,12 @@ for stmt in structureStatements:
   （html / vue / react），组件内容 = 该主体**最后一条声明**的内部结构 + 合并样式；
   与 HTML 保留标签同名的主体加 `My` 前缀（`GeneratorConfig.componentRename` 可显式
   改名，优先级最高），文件名为 PascalCase。
+* **CLI（cli.ts）**：预览/生成把诊断逐条打印到 **stderr**（预览 HTML 内仍附诊断列表）；
+  仅 warning → 退出码 `0`；存在 error → 产物仍写出但退出码 `1`；参数/IO 错误 → `1`。
 
 ## 7. 验证用例矩阵
 
-以下用例由 `.tmp-audit/matrix.js` 自动化验证（16 项全部通过）：
+以下用例由 `tests/semantics-matrix.js` 自动化验证（`npm test` 的一部分，16 项全部通过）：
 
 | 用例 | 结果 |
 | --- | --- |
@@ -227,7 +237,8 @@ for stmt in structureStatements:
 
 * **部分重叠的关系行**：`A / B` 后跟 `C / A`（主体集相交但不相同）——当前按新顶层单元
   处理（C/A 成为新单元追加），A 会被渲染两次。待后续版本裁决（整行替换 or 共存）。
-* **样式值中的结构字符**：`(`（如 `rgba(...)`）等会在结构符处截断样式值——此类值
-  请写在独立样式行。待 v0.x 放宽。
+* **括号外的 `/` 仍是结构符**：`font 12px/1.5 Arial` 这类 CSS 简写暂无法直接书写
+  （括号内的 `/` 不受影响）；样式值含未配对括号时无法推断边界，会按无意义 token
+  报 warning（或引发结构行 error）。
 * **行内样式与兄弟主体的分界**依赖 §2.1 的裸名称启发式；样式值本身是裸名称序列时
   （罕见）应改写到独立样式行。
