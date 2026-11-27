@@ -33,6 +33,9 @@
   内容一致时幂等跳过，内容不同需 `--force` 覆盖。新增 `src/skill.ts`、`skill/SKILL.md`
   与 `tests/skill.test.js`（15 项用例）；README（中英）/CLI-GUIDE/AGENTS 同步，AGENTS 将
   `skill/SKILL.md` 列为语法变动的必同步产物，package.json `files` 纳入 `skill/`。
+* [工具] 修复 `npm run deploy` 在 playground 无变化时失败：`git()` 辅助函数忽略了传入的
+  `cwd`，状态检查误在 master 工作区执行，且「gh-pages 已是最新」分支不会被命中，导致
+  空提交报错。现无差异时正确报告 already up to date 并退出 0。
 
 ## 2026-11-06
 

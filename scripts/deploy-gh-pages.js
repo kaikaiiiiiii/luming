@@ -11,7 +11,7 @@ const TMP = path.join(root, ".gh-pages-tmp");
 
 function git(args, options = {}) {
     const result = execSync("git " + args, {
-        cwd: root,
+        cwd: options.cwd || root,
         stdio: options.quiet ? "pipe" : "inherit",
     });
     return result ? result.toString().trim() : "";
