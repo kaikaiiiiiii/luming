@@ -4,26 +4,46 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import {
     compile,
+    detectProjectTools,
+    detectUserTools,
     Diagnostic,
+    findSkillTool,
     generateFiles,
     GenerateFramework,
     GeneratorConfig,
+    readCanonicalSkill,
+    readInstalledSkill,
     renderPreviewHtml,
+    resolveProjectRoot,
+    resolveSkillEnvironment,
+    SKILL_NAME,
+    SkillScope,
+    skillFilePath,
+    skillToolIds,
+    SkillToolDefinition,
+    writeSkill,
 } from "./src";
 
 type ParsedArgs = {
-    command: "preview" | "generate" | "help";
+    command: "preview" | "generate" | "skill" | "help";
     inputFile?: string;
     output?: string;
     framework: GenerateFramework;
     configPath?: string;
+    skillAction?: "add";
+    skillTool?: string;
+    skillScope: SkillScope;
+    skillDir?: string;
+    force: boolean;
 };
 
 function printHelp(): void {
     process.stdout.write(`Luming CLI\n\n`);
     process.stdout.write(`Usage:\n`);
     process.stdout.write(`  luming preview <input.luming> [-o output.html]\n`);
-    process.stdout.write(`  luming generate <input.luming> [-o outdir] [-f html|vue|react] [--config path]\n\n`);
+    process.stdout.write(`  luming generate <input.luming> [-o outdir] [-f html|vue|react] [--config path]\n`);
+    process.stdout.write(`  luming skill add [--tool dsh|claude|opencode|agents] [--scope project|user] [--dir <skills-root>] [--force]\n\n`);
+    process.stdout.write(`Tools: ${skillToolIds().join(", ")} (agents = cross-tool convention)\n`);
     process.stdout.write(`Diagnostics go to stderr; an error-level diagnostic exits with code 1\n`);
     process.stdout.write(`(outputs are still written), warnings alone exit with code 0.\n`);
 }
@@ -47,10 +67,80 @@ function loadConfig(configPath?: string): GeneratorConfig {
     return {};
 }
 
+function helpArgs(): ParsedArgs {
+    return {
+        command: "help",
+        framework: "html",
+        skillScope: "project",
+        force: false,
+    };
+}
+
+function nextValue(args: string[], index: number, flag: string): string {
+    const value = args[index + 1];
+    if (!value || value.startsWith("--")) {
+        throw new Error(`Missing value for ${flag}`);
+    }
+    return value;
+}
+
+function parseSkillArgs(rest: string[]): ParsedArgs {
+    const action = rest[0];
+    if (!action || action === "-h" || action === "--help" || action === "help") {
+        return helpArgs();
+    }
+    if (action !== "add") {
+        throw new Error(`Unknown skill action: ${action}. Usage: luming skill add [options]`);
+    }
+
+    const parsed: ParsedArgs = {
+        command: "skill",
+        skillAction: "add",
+        framework: "html",
+        skillScope: "project",
+        force: false,
+    };
+    for (let i = 1; i < rest.length; i += 1) {
+        const arg = rest[i];
+        if (arg === "-h" || arg === "--help") {
+            return helpArgs();
+        }
+        if (arg === "--tool" || arg === "-t") {
+            parsed.skillTool = nextValue(rest, i, arg);
+            i += 1;
+            continue;
+        }
+        if (arg === "--scope") {
+            const value = nextValue(rest, i, arg);
+            if (value !== "project" && value !== "user") {
+                throw new Error("--scope must be one of: project, user");
+            }
+            parsed.skillScope = value;
+            i += 1;
+            continue;
+        }
+        if (arg === "--dir") {
+            parsed.skillDir = nextValue(rest, i, arg);
+            i += 1;
+            continue;
+        }
+        if (arg === "--force") {
+            parsed.force = true;
+            continue;
+        }
+        throw new Error(`Unknown option for skill add: ${arg}`);
+    }
+    return parsed;
+}
+
 function parseArgs(argv: string[]): ParsedArgs {
     const [commandRaw, ...rest] = argv;
     if (!commandRaw || commandRaw === "-h" || commandRaw === "--help" || commandRaw === "help") {
-        return { command: "help", framework: "html" };
+        return helpArgs();
+    }
+
+    if (commandRaw === "skill") {
+        return parseSkillArgs(rest);
     }
 
     if (commandRaw !== "preview" && commandRaw !== "generate") {
@@ -95,6 +185,8 @@ function parseArgs(argv: string[]): ParsedArgs {
         output,
         framework,
         configPath,
+        skillScope: "project",
+        force: false,
     };
 }
 
@@ -173,11 +265,113 @@ function runGenerate(
     }
 }
 
+function requireSkillTool(id: string): SkillToolDefinition {
+    const tool = findSkillTool(id);
+    if (!tool) {
+        throw new Error(`Unknown tool: ${id}. Supported tools: ${skillToolIds().join(", ")}`);
+    }
+    return tool;
+}
+
+/**
+ * `luming skill add`: install the canonical `skill/SKILL.md` bundle into the
+ * project (default) or user scope; see README「集成路线 - Skill 集成」.
+ */
+function runSkillAdd(args: ParsedArgs): void {
+    const content = readCanonicalSkill();
+    const environment = resolveSkillEnvironment();
+    const requestedTool = args.skillTool ? requireSkillTool(args.skillTool) : undefined;
+    const targets: Array<{ toolId: string; skillsRoot: string }> = [];
+    let usedFallback = false;
+
+    if (args.skillDir) {
+        targets.push({
+            toolId: "custom",
+            skillsRoot: path.resolve(process.cwd(), args.skillDir),
+        });
+    } else if (args.skillScope === "project") {
+        const projectRoot = resolveProjectRoot(process.cwd());
+        const tools = requestedTool ? [requestedTool] : detectProjectTools(projectRoot);
+        if (tools.length === 0) {
+            usedFallback = true;
+            tools.push(requireSkillTool("agents"));
+        }
+        for (const tool of tools) {
+            targets.push({
+                toolId: tool.id,
+                skillsRoot: path.join(projectRoot, tool.projectDir),
+            });
+        }
+        process.stdout.write(`Project root: ${projectRoot}\n`);
+    } else {
+        const tools = requestedTool ? [requestedTool] : detectUserTools(environment);
+        if (tools.length === 0) {
+            throw new Error(
+                `No user-level tool directory detected; pass --tool <${skillToolIds().join("|")}> (or --dir).`
+            );
+        }
+        for (const tool of tools) {
+            targets.push({ toolId: tool.id, skillsRoot: tool.userSkillsDir(environment) });
+        }
+    }
+
+    if (usedFallback) {
+        process.stdout.write(
+            "No tool directory detected; using the cross-tool .agents/skills convention.\n"
+        );
+    }
+
+    const uniqueTargets = new Map<string, { toolId: string; skillsRoot: string }>();
+    for (const target of targets) {
+        const key = path.resolve(target.skillsRoot);
+        if (!uniqueTargets.has(key)) {
+            uniqueTargets.set(key, { ...target, skillsRoot: key });
+        }
+    }
+
+    const plans = Array.from(uniqueTargets.values()).map((target) => {
+        const filePath = skillFilePath(target.skillsRoot);
+        const existing = readInstalledSkill(target.skillsRoot);
+        const status: "installed" | "updated" | "up-to-date" | "conflict" =
+            existing === null ? "installed" : existing === content ? "up-to-date" : "conflict";
+        return { ...target, filePath, status };
+    });
+
+    const conflicts = plans.filter((plan) => plan.status === "conflict");
+    if (conflicts.length > 0 && !args.force) {
+        throw new Error(
+            `Skill already exists with different content: ` +
+            `${conflicts.map((plan) => plan.filePath).join(", ")}. ` +
+            `Re-run with --force to overwrite.`
+        );
+    }
+
+    for (const plan of plans) {
+        if (plan.status === "installed") {
+            writeSkill(plan.skillsRoot, content);
+            process.stdout.write(`[${plan.toolId}] installed ${plan.filePath}\n`);
+        } else if (plan.status === "conflict") {
+            writeSkill(plan.skillsRoot, content);
+            process.stdout.write(`[${plan.toolId}] updated ${plan.filePath} (--force)\n`);
+        } else {
+            process.stdout.write(`[${plan.toolId}] up to date ${plan.filePath}\n`);
+        }
+    }
+
+    process.stdout.write(
+        `Skill "${SKILL_NAME}" is ready; start a new agent session so it is discovered.\n`
+    );
+}
+
 function main(): void {
     try {
         const args = parseArgs(process.argv.slice(2));
         if (args.command === "help") {
             printHelp();
+            return;
+        }
+        if (args.command === "skill") {
+            runSkillAdd(args);
             return;
         }
 

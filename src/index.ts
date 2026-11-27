@@ -4,3 +4,4 @@ export * from "./parser";
 export * from "./compile";
 export * from "./renderer";
 export * from "./generator";
+export * from "./skill";

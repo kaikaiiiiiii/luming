@@ -35,6 +35,7 @@ CLI 用法（构建后）：
 ```bash
 node dist/cli.js preview <input.luming> [-o output.html]
 node dist/cli.js generate <input.luming> [-o outdir] [--framework html|vue|react] [--config path]
+node dist/cli.js skill add [--tool dsh|claude|opencode|agents] [--scope project|user] [--dir <skills-root>] [--force]
 ```
 
 用 `npm run typecheck` 验证改动；若行为发生变化，还需运行 `npm run build`。
@@ -43,7 +44,7 @@ node dist/cli.js generate <input.luming> [-o outdir] [--framework html|vue|react
 
 ```
 index.ts            # 顶层入口，re-export src/* 的内容
-cli.ts              # CLI 参数解析及 preview/generate 子命令
+cli.ts              # CLI 参数解析及 preview/generate/skill 子命令
 index.d.ts          # 类型声明
 src/
   types.ts          # 核心类型定义（AST、运行时、compile/generate 选项）
@@ -52,9 +53,11 @@ src/
   compile.ts        # AST -> RuntimeNode/RuntimeLayoutNode 根节点与场景
   renderer.ts       # 编译结果 -> 预览 HTML
   generator.ts      # 编译结果 -> 组件文件（html/vue/react）
+  skill.ts          # skill 安装（工具目录 registry/探测、SKILL.md 读写）
   index.ts          # re-export src 各模块
 docs/               # 文档：parse-rule.md（解析/合并/展开语义，定稿）、design-notes.md（裁决轨迹）、style.md
 examples/           # .luming 输入及各框架的生成产物
+skill/              # luming skill 权威副本（skill/SKILL.md），由 luming skill add 安装到工程/用户目录
 changes.log         # 变动记录（[语法] / [工具] 两类，最新在上）
 scripts/            # playground 构建脚本与模板（生成单文件 playground.html）
 playground.html     # 单文件可交互预览页（浏览器直接打开；npm run playground 重新生成）
@@ -72,7 +75,7 @@ ChagGPT-Luming_Lang_Design_Discuss.md # 本项目最初的需求、创意与头�
 - 每次提交涉及语法或功能变动时，在 `changes.log` **顶部**追加一条（最新在上，
   注明日期），两类可以同条混合时分开写清楚。
 - `[语法]` 变动必须先同步 `README.zh-CN.md` 与 `docs/parse-rule.md`（规范源），
-  再同步 `README.md` 与实现，并运行 `npm test` 维护验收矩阵。
+  再同步 `README.md`、`skill/SKILL.md` 与实现，并运行 `npm test` 维护验收矩阵。
 
 ## gh-pages 在线预览（部署约定）
 
@@ -105,8 +108,9 @@ ChagGPT-Luming_Lang_Design_Discuss.md # 本项目最初的需求、创意与头�
 - 测试布局：`tests/parser.test.js`（词法/文法/声明记录/诊断）、`tests/style.test.js`
   （样式 token）、`tests/compile.test.js`（语义与场景规则）、`tests/render.test.js`
   （预览 HTML 与默认样式）、`tests/generator.test.js`（组件生成与名称转换）、
-  `tests/cli.test.js`（CLI 端到端）；`tests/semantics-matrix.js` 是可独立运行的
-  16 项语义验收矩阵。测试运行在 `dist/` 编译产物上（pretest 自动构建）。
+  `tests/cli.test.js`（CLI 端到端）、`tests/skill.test.js`（skill 工具目录探测与安装）；
+  `tests/semantics-matrix.js` 是可独立运行的 16 项语义验收矩阵。测试运行在 `dist/`
+  编译产物上（pretest 自动构建）。
 - **新语法、新行为、修 bug 必须同步补用例**：语义类进 `semantics-matrix.js`，
   单元/集成类进对应的 `*.test.js`；修 bug 时先写复现用例再修。
 

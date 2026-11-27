@@ -140,7 +140,7 @@ import Content from './Content.vue';
 
 ...
 ```
-或者，让 AI 编辑器（agent）直接理解 路明：本项目维护一份 **luming skill**（写给 AI 编码代理的领域知识文件），并计划提供 CLI 命令把它安装到任意工程，使 agent 能够正确地编写、修改与调试 `.luming` 文件——详见下文[「集成路线」](#集成路线)。
+或者，让 AI 编辑器（agent）直接理解 路明：本项目维护一份 **luming skill**（写给 AI 编码代理的领域知识文件），并可通过 CLI 命令 `luming skill add` 把它安装到任意工程，使 agent 能够正确地编写、修改与调试 `.luming` 文件——详见下文[「集成路线」](#集成路线)。
 
 在快速示例中，我们定义了一个包含 Header、Sidebar、Main 和 Footer 的页面结构。Main 内部包含 Tabs 和 Content，Content 又包含 Form 和 Preview。通过简洁的语法，我们可以清晰地表达页面的层级关系和布局方式。
 
@@ -431,24 +431,39 @@ _要注意的是，用户可以使用 路明 写出复杂的界面结构，但�
 
 # 集成路线
 
-以下能力均在规划中（除注明外均为 TODO）：
+以下能力中 Skill 集成已落地；其余仍在规划中（除注明外均为 TODO）：
 
 ## Skill 集成：为任意工程添加 luming skill
 
-![TODO](./img/todo.svg)
+**已实现。** 仓库内维护一份「路明 skill」——写给 AI 编码代理的领域知识文件（语法速查、
+书写约定、调试指引），**权威副本是 [skill/SKILL.md](skill/SKILL.md)**，作为单一事实来源；
+语法或语义变动时必须同步更新它（见 [AGENTS.md](AGENTS.md)）。
 
-编辑并维护一份「路明 skill」——写给 AI 编码代理的领域知识文件（语法速查、书写约定、
-调试指引），并把它的**权威副本放在本仓库内**（如 `skill/SKILL.md`）作为单一事实来源。
-`.opencode/skills/luming/SKILL.md` 是早期由 agent 写入其工具目录的初版，实现时将
-迁回统一维护。
+安装命令：
 
-新增一个 CLI 命令（如 `luming skill add [--tool <name>]`），把 skill 安装到**任意
-工程**中，用于 agent 辅助开发：
+```bash
+luming skill add [--tool <id>] [--scope project|user] [--dir <skills-root>] [--force]
+```
 
-* 各工具的安装路径约定不同，命令负责把 skill 复制到目标工具的约定位置：
-  `.opencode/skills/luming/`（OpenCode）、`.claude/skills/luming/`（Claude Code）等；
-* 不指定 `--tool` 时，探测当前工程已存在哪个工具的目录并默认安装到那里；
-* 安装完成后，AI 编辑器加载 skill 即可正确地编写、修改与调试 `.luming` 文件。
+* `--scope project`（默认）：安装到**当前工程**，随仓库提交、团队共享，优先级最高；
+* `--scope user`：安装到**本机用户级**目录，所有工程可见；
+* `--tool` 指定工具；省略时探测已存在的工具目录（工程级可探测到多个，则全部安装）；
+* `--dir` 直接指定技能根目录（其下创建 `luming/`），用于未内置支持的编辑器；
+* 幂等：目标 `luming/SKILL.md` 内容一致时跳过；内容不同且未加 `--force` 时报错退出；
+* 安装后 agent 在下次会话中发现该 skill，即可正确编写、修改与调试 `.luming` 文件。
+
+各工具的约定位置：
+
+| `--tool` | 工程级（`--scope project`） | 用户级（`--scope user`） |
+| --- | --- | --- |
+| `dsh` | `.dsh/skills/luming/SKILL.md` | `$DSH_HOME/skills/luming/SKILL.md`（默认 `~/.dsh/skills`） |
+| `claude` | `.claude/skills/luming/SKILL.md` | `~/.claude/skills/luming/SKILL.md` |
+| `opencode` | `.opencode/skills/luming/SKILL.md` | `~/.config/opencode/skills/luming/SKILL.md`（遵循 `XDG_CONFIG_HOME`） |
+| `agents` | `.agents/skills/luming/SKILL.md` | `~/.agents/skills/luming/SKILL.md` |
+
+`agents` 是跨工具约定目录（Agent Skills 标准；DSH、OpenCode 等直接支持）。工程内
+一个工具目录都探测不到时，`--scope project` 默认安装到 `.agents/skills`；`--scope user`
+探测不到任何用户级目录时需显式指定 `--tool`（或 `--dir`）。
 
 > 项目最初的设想是「把 `.luming` 转为自然语言描述，交给 Chat AI 生成代码」。skill
 > 方案把语法与约定直接、完整地交给 agent，更合理也更高效，因此取代前者。

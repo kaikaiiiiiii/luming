@@ -143,9 +143,9 @@ import Content from './Content.vue';
 ...
 ```
 Or let your AI editor (agent) understand **Luming** directly: this project maintains
-a **luming skill** (a domain-knowledge file written for AI coding agents) and plans a
-CLI command to install it into any project, so agents can correctly write, edit, and
-debug `.luming` files — see [Integration Roadmap](#integration-roadmap) below.
+a **luming skill** (a domain-knowledge file written for AI coding agents) and ships a
+CLI command `luming skill add` to install it into any project, so agents can correctly
+write, edit, and debug `.luming` files — see [Integration Roadmap](#integration-roadmap) below.
 
 In the quick example, we defined a page structure containing Header, Sidebar, Main, and Footer. Inside Main, there are Tabs and Content, and Content further contains Form and Preview. With concise syntax, we can clearly express the page's hierarchical relationships and layout.
 
@@ -435,28 +435,46 @@ A structure line that cannot be parsed is reported as an `error` (that line is s
 
 # Integration Roadmap
 
-The following capabilities are planned (all TODO unless noted):
+The following capabilities are partially implemented: Skill Integration is available; the rest are planned (all TODO unless noted):
 
 ## Skill Integration: install the luming skill into any project
 
-![TODO](./img/todo.svg)
+**Implemented.** This repository maintains a **luming skill** — a domain-knowledge file
+for AI coding agents (syntax cheat sheet, authoring conventions, debugging guidance) —
+whose **canonical copy is [skill/SKILL.md](skill/SKILL.md)**, the single source of truth.
+Update it whenever the syntax or semantics change (see [AGENTS.md](AGENTS.md)).
 
-Edit and maintain a **luming skill** — a domain-knowledge file for AI coding agents
-(syntax cheat sheet, authoring conventions, debugging guidance) — with its canonical
-copy kept in this repository (e.g. `skill/SKILL.md`) as the single source of truth.
-`.opencode/skills/luming/SKILL.md` is an early version an agent wrote into its own
-tool directory; it will migrate back to the canonical location during implementation.
+Install command:
 
-Add a CLI command (e.g. `luming skill add [--tool <name>]`) that installs the skill
-into **any project** for agent-assisted development:
+```bash
+luming skill add [--tool <id>] [--scope project|user] [--dir <skills-root>] [--force]
+```
 
-* Each tool has its own install convention; the command copies the skill to the
-  target tool's conventional location: `.opencode/skills/luming/` (OpenCode),
-  `.claude/skills/luming/` (Claude Code), etc.;
-* Without `--tool`, it detects which tool directory already exists in the current
-  project and installs there by default;
-* Once installed, the AI editor loads the skill and can correctly write, edit, and
-  debug `.luming` files.
+* `--scope project` (default): installs into the **current project**, committed with the
+  repository and shared with the team — the highest-precedence scope;
+* `--scope user`: installs into the **per-user** directory, visible to all projects on
+  this machine;
+* `--tool` selects a tool; when omitted, existing tool directories are detected (several
+  project-level ones are all installed into);
+* `--dir` sets the skill root directory explicitly (a `luming/` subdirectory is created
+  there) for editors that are not built in;
+* Idempotent: an identical `luming/SKILL.md` is skipped; a different one fails without
+  `--force`;
+* Once installed, the agent discovers the skill in its next session and can correctly
+  write, edit, and debug `.luming` files.
+
+Conventional locations per tool:
+
+| `--tool` | Project (`--scope project`) | User (`--scope user`) |
+| --- | --- | --- |
+| `dsh` | `.dsh/skills/luming/SKILL.md` | `$DSH_HOME/skills/luming/SKILL.md` (default `~/.dsh/skills`) |
+| `claude` | `.claude/skills/luming/SKILL.md` | `~/.claude/skills/luming/SKILL.md` |
+| `opencode` | `.opencode/skills/luming/SKILL.md` | `~/.config/opencode/skills/luming/SKILL.md` (honors `XDG_CONFIG_HOME`) |
+| `agents` | `.agents/skills/luming/SKILL.md` | `~/.agents/skills/luming/SKILL.md` |
+
+`agents` is the cross-tool convention directory (Agent Skills standard; DSH and OpenCode
+read it directly). When no tool directory is detected, `--scope project` falls back to
+`.agents/skills`; `--scope user` requires an explicit `--tool` (or `--dir`).
 
 > The original vision was "translate `.luming` into natural-language descriptions
 > and hand them to a chat AI to generate code". The skill approach hands the syntax

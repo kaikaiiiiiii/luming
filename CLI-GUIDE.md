@@ -68,6 +68,29 @@ luming generate examples/quickstart.luming -o components --framework vue
 **诊断与退出码：** 诊断逐条打印到 stderr；仅有 warning 时退出码 `0`；出现 error 级诊断时
 产物仍会写出、退出码 `1`；参数或输入文件错误退出 `1`。
 
+### Skill 安装（Skill Add）
+
+把权威 skill（`skill/SKILL.md`）安装到 AI 编码代理的约定位置：
+
+```bash
+node dist/cli.js skill add [--tool dsh|claude|opencode|agents] [--scope project|user] [--dir <skills-root>] [--force]
+```
+
+**默认参数：** `--scope project`；`--tool` 省略时自动探测工程内已存在的工具目录
+（`.dsh` / `.claude` / `.opencode` / `.agents`，可多个、全部安装）；一个都没有时回退到
+跨工具约定 `.agents/skills`。
+
+**作用域：**
+
+- 工程级（默认）：`.dsh/skills/`、`.claude/skills/`、`.opencode/skills/`、`.agents/skills/`，
+  随仓库提交、团队共享；
+- 用户级（`--scope user`）：`$DSH_HOME/skills`、`~/.claude/skills`、`~/.config/opencode/skills`、
+  `~/.agents/skills`，仅本机所有工程可见；
+- `--dir <skills-root>` 直接指定技能根目录（其下创建 `luming/`）。
+
+**幂等与覆盖：** 目标 `luming/SKILL.md` 内容一致时跳过（退出码 0）；内容不同时默认报错、
+提示 `--force` 覆盖。完整路径表见 `README.zh-CN.md`「集成路线 - Skill 集成」。
+
 ---
 
 ## 已实现特性
@@ -79,7 +102,8 @@ luming generate examples/quickstart.luming -o components --framework vue
 ✅ 样式缩写（`bg`、`rd`、数值宽度等）  
 ✅ 多行组合式定义  
 ✅ 预览模式带视觉层级与诊断信息  
-✅ 生成模式输出 Vue/React/HTML 独立组件
+✅ 生成模式输出 Vue/React/HTML 独立组件  
+✅ `luming skill add` 安装 luming skill（工程级/用户级、工具自动探测）
 
 ---
 

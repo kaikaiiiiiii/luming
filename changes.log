@@ -26,6 +26,13 @@
   `rm -rf` 失败。
 * [工具] 清理陈旧产物：删除无源旧样例 `examples/circular2.preview.html` 与 README 旧
   图示遗留的 6 个未引用 `img/*.svg`。
+* [工具] 新增 `luming skill add`：把仓库权威副本 `skill/SKILL.md` 安装到 AI 编码代理的
+  约定位置，支持 `--tool dsh|claude|opencode|agents`、`--scope project|user`、
+  `--dir <skills-root>`、`--force`。工程级自动探测 `.dsh`/`.claude`/`.opencode`/`.agents`
+  并全部安装，无工具目录时回退跨工具约定 `.agents/skills`；用户级探测已有工具目录；
+  内容一致时幂等跳过，内容不同需 `--force` 覆盖。新增 `src/skill.ts`、`skill/SKILL.md`
+  与 `tests/skill.test.js`（15 项用例）；README（中英）/CLI-GUIDE/AGENTS 同步，AGENTS 将
+  `skill/SKILL.md` 列为语法变动的必同步产物，package.json `files` 纳入 `skill/`。
 
 ## 2026-11-06
 
