@@ -27,6 +27,20 @@ function isDirty() {
     }
 }
 
+/**
+ * Content-based clean check for another working directory (e.g. the gh-pages
+ * worktree). `git status` can report phantom modifications on Windows after a
+ * byte-identical copy, so compare contents with `git diff --quiet` instead.
+ */
+function isDirtyAt(cwd) {
+    try {
+        git("diff --quiet", { quiet: true, cwd });
+        return false;
+    } catch {
+        return true;
+    }
+}
+
 function main() {
     if (isDirty()) {
         console.error("Deploy aborted: working tree has uncommitted changes. Commit first.");
@@ -59,7 +73,7 @@ function main() {
         }
         fs.copyFileSync(path.join(root, "playground.html"), path.join(TMP, "index.html"));
 
-        if (!git("status --porcelain", { quiet: true, cwd: TMP })) {
+        if (!isDirtyAt(TMP)) {
             console.log("gh-pages already up to date (master " + masterSha + ").");
             return;
         }
