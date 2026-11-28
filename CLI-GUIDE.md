@@ -8,6 +8,17 @@
 > npm 包名是 **`luming-say`**，安装后的命令名是 **`lum`**（`bin` 只有这一个入口，
 > 所以 `npx luming-say ...` 等价于执行 `lum ...`）。
 
+## 命令总览
+
+| 命令 | 说明 |
+| --- | --- |
+| `lum preview <input.luming> [-o output.html]` | 单文件 HTML 预览 |
+| `lum generate <input.luming> [-o outdir] [-f html\|vue\|react] [-c config.json]` | 组件文件生成 |
+| `lum skill add [--tool <id>] [--scope project\|user] [--dir <root>] [--force]` | 安装 luming skill |
+| `lum` / `lum --help` / `lum help` | 命令帮助 |
+
+完整语义与默认值见 `README.zh-CN.md`「使用 - 命令参考」。
+
 ---
 
 ## 快速开始

@@ -204,7 +204,7 @@ for stmt in structureStatements:
   品牌蓝 `#0F6CBD`、紫、绿、橙、红、青，逐层轮换）、8px 中号圆角、分层阴影
   （elevation 4）、Segoe UI 字体与次级文字色标签（`Terminus` 追加标记）；
   `+` 水平组的子项默认 `flex: 1 1 0` **横向等分**（显式设置过 `width` / `flex`
-  的子项保留自己的设定）；显式样式覆盖全部默认值；诊断显示在页首。
+  的子项保留自己的设定）；显式样式覆盖全部默认值；诊断列于页面末尾。
 * **generator.ts（生成模式）**：凡出现在页面根中的主体各生成一个组件文件
   （html / vue / react），组件内容 = 该主体**最后一条声明**的内部结构 + 合并样式；
   与 HTML 保留标签同名的主体加 `My` 前缀（`GeneratorConfig.componentRename` 可显式

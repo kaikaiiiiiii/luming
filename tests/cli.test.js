@@ -133,3 +133,27 @@ test("cli keeps exit code 0 when diagnostics are warnings only", () => {
     assert.ok(result.stderr.includes("[warning]"));
     assert.ok(fs.existsSync(out));
 });
+
+test("cli rejects unknown options, extra arguments and missing option values", () => {
+    const dir = tmpdir("luming-cli-args-");
+    const input = path.join(dir, "input.luming");
+    fs.writeFileSync(input, INPUT, "utf8");
+
+    const unknown = runRaw(["preview", input, "--bogus"]);
+    assert.equal(unknown.status, 1);
+    assert.match(unknown.stderr, /Unknown option: --bogus/);
+
+    const extra = runRaw(["preview", input, "second.luming"]);
+    assert.equal(extra.status, 1);
+    assert.match(extra.stderr, /Unexpected argument: second\.luming/);
+
+    const missing = runRaw(["preview", input, "-o"]);
+    assert.equal(missing.status, 1);
+    assert.match(missing.stderr, /Missing value for -o/);
+});
+
+test("cli preview --help prints help without requiring an input file", () => {
+    const result = runRaw(["preview", "--help"]);
+    assert.equal(result.status, 0);
+    assert.ok(result.stdout.includes("lum preview"));
+});

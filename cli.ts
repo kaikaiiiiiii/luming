@@ -155,14 +155,17 @@ function parseArgs(argv: string[]): ParsedArgs {
 
     for (let i = 0; i < rest.length; i += 1) {
         const arg = rest[i];
+        if (arg === "-h" || arg === "--help") {
+            return helpArgs();
+        }
         if (arg === "-o" || arg === "--out") {
-            output = rest[i + 1];
+            output = nextValue(rest, i, arg);
             i += 1;
             continue;
         }
         if (arg === "-f" || arg === "--framework") {
-            const value = rest[i + 1] as GenerateFramework | undefined;
-            if (!value || (value !== "html" && value !== "vue" && value !== "react")) {
+            const value = nextValue(rest, i, arg);
+            if (value !== "html" && value !== "vue" && value !== "react") {
                 throw new Error("--framework must be one of: html, vue, react");
             }
             framework = value;
@@ -170,14 +173,17 @@ function parseArgs(argv: string[]): ParsedArgs {
             continue;
         }
         if (arg === "-c" || arg === "--config") {
-            configPath = rest[i + 1];
+            configPath = nextValue(rest, i, arg);
             i += 1;
             continue;
         }
-        if (!inputFile) {
-            inputFile = arg;
-            continue;
+        if (arg.startsWith("-")) {
+            throw new Error(`Unknown option: ${arg}`);
         }
+        if (inputFile) {
+            throw new Error(`Unexpected argument: ${arg}`);
+        }
+        inputFile = arg;
     }
 
     return {

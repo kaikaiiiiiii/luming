@@ -142,6 +142,8 @@ import Content from './Content.vue';
 
 ...
 ```
+_Note: `App.vue` illustrates how to compose generated components; it is not a `lum generate` product. The generator emits one component file per entity and does not create an entry file._
+
 Or let your AI editor (agent) understand **Luming** directly: this project maintains
 a **luming skill** (a domain-knowledge file written for AI coding agents) and ships a
 CLI command `lum skill add` to install it into any project, so agents can correctly
@@ -394,7 +396,7 @@ Add conditional display syntax.
 
 # Usage
 
-<span style='color: #ffb464; font-weight: bold;'>**Luming**</span> provides a command-line tool to compile its textual descriptions into visual previews or structured front-end code components. To cater to different scenarios, **Luming** offers two invocation methods: Preview Mode and Generate Mode.
+<span style='color: #ffb464; font-weight: bold;'>**Luming**</span> provides a command-line tool to compile its textual descriptions into visual previews or structured front-end code components. To cater to different scenarios, the CLI offers three command families: **preview**, **component generation**, and **skill installation**:
 
 The CLI is published on npm as **`luming-say`** and installs the command **`lum`**:
 
@@ -403,6 +405,50 @@ npx luming-say preview page.luming        # run without installing
 npm install -g luming-say                 # global install
 lum preview page.luming -o page.html      # afterwards
 ```
+
+## Command Reference
+
+The command is **`lum`** (npm package `luming-say`); without a global install, use `npx luming-say` in place of `lum`.
+
+| Command | Purpose |
+| --- | --- |
+| `lum preview <input.luming> [-o output.html]` | Compile to a single-file HTML preview |
+| `lum generate <input.luming> [-o outdir] [-f html\|vue\|react] [-c config.json]` | Generate HTML / Vue / React component files |
+| `lum skill add [--tool <id>] [--scope project\|user] [--dir <skills-root>] [--force]` | Install the luming skill into a project or user directory |
+| `lum`, `lum --help`, `lum help` | Print command help |
+
+### `lum preview`
+
+- Input: one `.luming` file; one document is exactly one page.
+- Output: a single HTML file (inline CSS, Fluent 2 defaults, diagnostics listed at the end).
+- `-o, --out`: output path, default `luming.preview.html` (relative to the current directory).
+
+### `lum generate`
+
+- Output: one component file per entity present in the page root (PascalCase file names;
+  entities that collide with HTML tags get a `My` prefix).
+- `-o, --out`: output directory, default `generated/`.
+- `-f, --framework`: `html` (default) | `vue` | `react`.
+- `-c, --config`: config file, default `luming.config.json` in the current directory. Fields:
+  `componentRename` (`Record<string, string>`, explicit rename, highest priority) and
+  `reservedPrefix` (prefix for reserved HTML tag names, default `My`).
+- **No entry file is generated** (such as `App.vue`); create the entry yourself and compose
+  the generated components.
+
+### `lum skill add`
+
+Installs the canonical skill copy into the conventional location of an AI coding agent.
+Without `--tool`, existing `.dsh`/`.claude`/`.opencode`/`.agents` directories are detected
+(all project-level matches are installed) and `.agents/skills` is the fallback. See
+"Integration Roadmap - Skill Integration" below for the full path table and idempotency /
+`--force` behavior.
+
+### Help and errors
+
+- No arguments or `--help`: print help, exit code `0`.
+- Unknown command, unknown option, extra argument, missing option value, missing input
+  file, invalid config: error on stderr, exit code `1`.
+- Diagnostic and exit-code rules are described in "Diagnostics and Exit Codes" below.
 
 ## Preview Mode
 
@@ -424,7 +470,7 @@ When you explicitly specify styles, these basic styles are overridden. For examp
 
 In generate mode, **Luming** creates a separate file for each entity, containing only the style attributes you explicitly specified and the necessary layout attributes. This means if you don't specify any styles for an entity, the generated code will contain no style attributes. However, essential CSS properties for layout (like `display: flex`, `flex-direction`, etc.) are automatically added to ensure the entity's layout relationships are correct.
 
-Through parameter control, you can choose to generate component code for Vue, React, or other frameworks. Relationships between multiple components are connected via import statements or other means to ensure they can be correctly combined into a complete interface.
+Through parameter control, you can choose to generate component code for Vue, React, or HTML. Relationships between multiple components are connected via import statements or other means to ensure they can be correctly combined into a complete interface.
 
 Note: Users can write complex interface structures using **Luming**, but since **Luming**'s generate mode creates a separate file for each component, a complex structure might generate a large number of files, requiring proper organization and management.
 

@@ -19,6 +19,11 @@
   `lum`；CLI-GUIDE、AGENTS、skill/SKILL.md、`--help` 文本同步。
 * [工具] 发布流程彩蛋：`--help` 提示 `npx luming-say` 等价用法；CLI 帮助中的命令名
   全部改为 `lum`。
+* [工具] 命令定义整理：README（中英）新增「命令参考」表与逐命令定义（用法、默认值、
+  `--config` 字段、帮助与错误），并修正旧表述——生成模式没有「默认 CSS 开关」、
+  生成器不产出入口文件（`App.vue` 仅为组合示意）、诊断列在页面末尾、可选框架仅为
+  html/vue/react；CLI 对 `preview`/`generate` 的未知选项、多余参数、缺失选项值改为
+  报错（退出码 1），新增 2 项 CLI 用例；CLI-GUIDE 增加「命令总览」。
 
 ## 2026-11-27
 

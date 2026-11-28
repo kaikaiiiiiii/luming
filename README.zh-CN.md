@@ -140,11 +140,13 @@ import Content from './Content.vue';
 
 ...
 ```
+_注：`App.vue` 是「如何组合生成组件」的用法示意，并不是 `lum generate` 的产物；生成器目前为每个主体生成一个组件文件，不自动生成入口文件。_
+
 或者，让 AI 编辑器（agent）直接理解 路明：本项目维护一份 **luming skill**（写给 AI 编码代理的领域知识文件），并可通过 CLI 命令 `lum skill add` 把它安装到任意工程，使 agent 能够正确地编写、修改与调试 `.luming` 文件——详见下文[「集成路线」](#集成路线)。
 
 在快速示例中，我们定义了一个包含 Header、Sidebar、Main 和 Footer 的页面结构。Main 内部包含 Tabs 和 Content，Content 又包含 Form 和 Preview。通过简洁的语法，我们可以清晰地表达页面的层级关系和布局方式。
 
-在结构之外，我们还可以为每个主体添加 CSS 样式修饰，例如 Main 的背景色、Tabs 的标签样式、Sidebar 的宽度以及 Form 的圆角。这些样式是独立于结构定义的，保持了页面层级的清晰，同时也提供了足够的灵活性来调整视觉效果。在预览模式中，Luming 会自动添加一些 CSS 使得效果更可视，在代码生成中则可以使用参数开关来切换是否添加默认 CSS 样式。
+在结构之外，我们还可以为每个主体添加 CSS 样式修饰，例如 Main 的背景色、Tabs 的标签样式、Sidebar 的宽度以及 Form 的圆角。这些样式是独立于结构定义的，保持了页面层级的清晰，同时也提供了足够的灵活性来调整视觉效果。在预览模式中，Luming 会自动添加一些 CSS 使得效果更可视；生成模式则只输出你显式指定的样式与布局必需的属性，不继承预览默认样式。
 
 路明 无法直接生成完整的设计稿或高保真原型，或生成完全适配当前工程项目的前端代码，路明 的目标是提供一种 **快速表达和迭代界面结构的工具**，帮助开发者快速预览原型，搭建可用的组件骨架，这在 Vibe Coding 生成 prototype 中尤其有用。
 
@@ -389,7 +391,7 @@ List [Item: bg #99f; Item Item]
 
 # 使用
 
-<span style='color: #ffb464; font-weight: bold;'>路明</span> 提供了命令行工具来将自身的文本描述编译为可视化预览或结构化的前端代码组件。为了满足不同场景，路明 提供了预览模式和生成模式两种调用方法:
+<span style='color: #ffb464; font-weight: bold;'>路明</span> 提供了命令行工具来将自身的文本描述编译为可视化预览或结构化的前端代码组件。为了满足不同场景，路明 的命令行工具提供**预览**、**组件生成**与 **skill 安装**三类命令:
 
 命令行工具以 npm 包 **`luming-say`** 发布，安装后的命令名为 **`lum`**：
 
@@ -398,6 +400,46 @@ npx luming-say preview page.luming        # 不安装直接运行
 npm install -g luming-say                 # 全局安装
 lum preview page.luming -o page.html      # 之后的用法
 ```
+
+## 命令参考
+
+命令名为 **`lum`**（npm 包 `luming-say`）；未安装时可用 `npx luming-say` 代替 `lum`。
+
+| 命令 | 用途 |
+| --- | --- |
+| `lum preview <input.luming> [-o output.html]` | 编译为单文件 HTML 预览 |
+| `lum generate <input.luming> [-o outdir] [-f html\|vue\|react] [-c config.json]` | 生成 HTML / Vue / React 组件文件 |
+| `lum skill add [--tool <id>] [--scope project\|user] [--dir <skills-root>] [--force]` | 把 luming skill 安装到工程/用户目录 |
+| `lum`、`lum --help`、`lum help` | 输出命令帮助 |
+
+### `lum preview`
+
+- 输入：一个 `.luming` 文件；一份文档就是一个页面。
+- 输出：单文件 HTML（内嵌 CSS，默认 Fluent 2 观感，诊断列于文末）。
+- `-o, --out`：输出路径，默认 `luming.preview.html`（相对当前目录）。
+
+### `lum generate`
+
+- 输出：出现在页面根中的每个主体一个组件文件（文件名按 PascalCase；与 HTML 标签同名的
+  主体加 `My` 前缀）。
+- `-o, --out`：输出目录，默认 `generated/`。
+- `-f, --framework`：`html`（默认）| `vue` | `react`。
+- `-c, --config`：配置文件；默认读取当前目录的 `luming.config.json`。字段：
+  `componentRename`（`Record<string, string>`，显式改名，优先级最高）与
+  `reservedPrefix`（HTML 保留标签前缀，默认 `My`）。
+- **不生成入口文件**（如 `App.vue`）：需要自行创建入口并组合生成的组件。
+
+### `lum skill add`
+
+把仓库内的 skill 权威副本安装到 AI 编码代理的约定位置；`--tool` 省略时自动探测
+`.dsh`/`.claude`/`.opencode`/`.agents`（工程级可多个、全部安装），未探测到工程级目录时
+回退 `.agents/skills`。完整路径表与幂等/`--force` 行为见下文「集成路线 - Skill 集成」。
+
+### 帮助与错误
+
+- 无参数或 `--help`：输出帮助，退出码 `0`。
+- 未知命令、未知选项、多余参数、缺少选项值、输入文件不存在、配置文件非法：stderr 报错，退出码 `1`。
+- 诊断与退出码规则见下文「诊断与退出码」。
 
 ## 预览模式：
 
@@ -419,7 +461,7 @@ lum preview page.luming -o page.html      # 之后的用法
 
 在生成模式下，路明 会为每个主体单独生成一个文件，并且只包含你显式指定的样式属性，和必要的布局属性。这意味着如果你没有为主体指定任何样式，生成的代码将不会包含任何样式属性。但布局必须的 CSS 属性（如 `display: flex`、`flex-direction` 等）会被自动添加，以确保主体的布局关系正确。
 
-通过参数控制，你可以选择生成 Vue、React 或其他框架的组件代码。多个组件之间的关系会通过 import 语句或其他方式进行连接，以确保它们能够正确地组合成一个完整的界面。
+通过参数控制，你可以选择生成 Vue、React 或 HTML 的组件代码。多个组件之间的关系会通过 import 语句或其他方式进行连接，以确保它们能够正确地组合成一个完整的界面。
 
 _要注意的是，用户可以使用 路明 写出复杂的界面结构，但由于 路明 生成模式会为每一个组件生成一个独立的文件，一个复杂结构可能会生成大量的文件，需要合理组织和管理。_
 
