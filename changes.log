@@ -9,6 +9,17 @@
 
 ---------------------------------------------------------------------
 
+## 2026-11-28
+
+* [工具] npm 发布就绪：包名定为 **`luming-say`**，安装后的命令名定为 **`lum`**（`bin`
+  只保留单入口，保证 `npx luming-say <cmd>` 等价于直接执行 `lum <cmd>`）；补充
+  `repository`/`bugs`/`homepage`/`author`/`keywords`/`engines`/`publishConfig` 元数据，
+  新增 `LICENSE`（MIT）与 `prepare`（构建，供 git 安装）/`prepublishOnly`（发布前跑
+  `npm test`）脚本。README（中英）新增 npm/npx/全局安装用法，并统一把 CLI 命令名写作
+  `lum`；CLI-GUIDE、AGENTS、skill/SKILL.md、`--help` 文本同步。
+* [工具] 发布流程彩蛋：`--help` 提示 `npx luming-say` 等价用法；CLI 帮助中的命令名
+  全部改为 `lum`。
+
 ## 2026-11-27
 
 * [语法] 样式区放宽：样式值中的**成对圆括号**属于值本身，不再把 `(` `)` 当作样式区结束符

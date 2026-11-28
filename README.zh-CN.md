@@ -140,7 +140,7 @@ import Content from './Content.vue';
 
 ...
 ```
-或者，让 AI 编辑器（agent）直接理解 路明：本项目维护一份 **luming skill**（写给 AI 编码代理的领域知识文件），并可通过 CLI 命令 `luming skill add` 把它安装到任意工程，使 agent 能够正确地编写、修改与调试 `.luming` 文件——详见下文[「集成路线」](#集成路线)。
+或者，让 AI 编辑器（agent）直接理解 路明：本项目维护一份 **luming skill**（写给 AI 编码代理的领域知识文件），并可通过 CLI 命令 `lum skill add` 把它安装到任意工程，使 agent 能够正确地编写、修改与调试 `.luming` 文件——详见下文[「集成路线」](#集成路线)。
 
 在快速示例中，我们定义了一个包含 Header、Sidebar、Main 和 Footer 的页面结构。Main 内部包含 Tabs 和 Content，Content 又包含 Form 和 Preview。通过简洁的语法，我们可以清晰地表达页面的层级关系和布局方式。
 
@@ -391,6 +391,14 @@ List [Item: bg #99f; Item Item]
 
 <span style='color: #ffb464; font-weight: bold;'>路明</span> 提供了命令行工具来将自身的文本描述编译为可视化预览或结构化的前端代码组件。为了满足不同场景，路明 提供了预览模式和生成模式两种调用方法:
 
+命令行工具以 npm 包 **`luming-say`** 发布，安装后的命令名为 **`lum`**：
+
+```bash
+npx luming-say preview page.luming        # 不安装直接运行
+npm install -g luming-say                 # 全局安装
+lum preview page.luming -o page.html      # 之后的用法
+```
+
 ## 预览模式：
 
 在预览模式下，路明 会尽可能生成单一的 html 文档，在一个文档内嵌入入所有的 html css js 内容，以便被其它工具或浏览器直接渲染。在这个模式下，路明 会自动为每个主体添加一些基础的样式，以确保它们在视觉上是可见的，并且能够清晰地展示它们之间的层级关系。这些基础样式包括：
@@ -442,8 +450,10 @@ _要注意的是，用户可以使用 路明 写出复杂的界面结构，但�
 安装命令：
 
 ```bash
-luming skill add [--tool <id>] [--scope project|user] [--dir <skills-root>] [--force]
+lum skill add [--tool <id>] [--scope project|user] [--dir <skills-root>] [--force]
 ```
+
+（npm 包名 `luming-say`；用 npx 一次性运行时写成 `npx luming-say skill add ...`。）
 
 * `--scope project`（默认）：安装到**当前工程**，随仓库提交、团队共享，优先级最高；
 * `--scope user`：安装到**本机用户级**目录，所有工程可见；

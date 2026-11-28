@@ -38,6 +38,8 @@ node dist/cli.js generate <input.luming> [-o outdir] [--framework html|vue|react
 node dist/cli.js skill add [--tool dsh|claude|opencode|agents] [--scope project|user] [--dir <skills-root>] [--force]
 ```
 
+npm 包名为 `luming-say`，安装后命令名为 `lum`（`npx luming-say <cmd>` 等价）。
+
 用 `npm run typecheck` 验证改动；若行为发生变化，还需运行 `npm run build`。
 
 ## 仓库结构
@@ -57,7 +59,7 @@ src/
   index.ts          # re-export src 各模块
 docs/               # 文档：parse-rule.md（解析/合并/展开语义，定稿）、design-notes.md（裁决轨迹）、style.md
 examples/           # .luming 输入及各框架的生成产物
-skill/              # luming skill 权威副本（skill/SKILL.md），由 luming skill add 安装到工程/用户目录
+skill/              # luming skill 权威副本（skill/SKILL.md），由 lum skill add 安装到工程/用户目录
 changes.log         # 变动记录（[语法] / [工具] 两类，最新在上）
 scripts/            # playground 构建脚本与模板（生成单文件 playground.html）
 playground.html     # 单文件可交互预览页（浏览器直接打开；npm run playground 重新生成）

@@ -40,9 +40,10 @@ type ParsedArgs = {
 function printHelp(): void {
     process.stdout.write(`Luming CLI\n\n`);
     process.stdout.write(`Usage:\n`);
-    process.stdout.write(`  luming preview <input.luming> [-o output.html]\n`);
-    process.stdout.write(`  luming generate <input.luming> [-o outdir] [-f html|vue|react] [--config path]\n`);
-    process.stdout.write(`  luming skill add [--tool dsh|claude|opencode|agents] [--scope project|user] [--dir <skills-root>] [--force]\n\n`);
+    process.stdout.write(`  lum preview <input.luming> [-o output.html]\n`);
+    process.stdout.write(`  lum generate <input.luming> [-o outdir] [-f html|vue|react] [--config path]\n`);
+    process.stdout.write(`  lum skill add [--tool dsh|claude|opencode|agents] [--scope project|user] [--dir <skills-root>] [--force]\n\n`);
+    process.stdout.write(`Installed from npm as "luming-say": npx luming-say <command> works too.\n`);
     process.stdout.write(`Tools: ${skillToolIds().join(", ")} (agents = cross-tool convention)\n`);
     process.stdout.write(`Diagnostics go to stderr; an error-level diagnostic exits with code 1\n`);
     process.stdout.write(`(outputs are still written), warnings alone exit with code 0.\n`);
@@ -90,7 +91,7 @@ function parseSkillArgs(rest: string[]): ParsedArgs {
         return helpArgs();
     }
     if (action !== "add") {
-        throw new Error(`Unknown skill action: ${action}. Usage: luming skill add [options]`);
+        throw new Error(`Unknown skill action: ${action}. Usage: lum skill add [options]`);
     }
 
     const parsed: ParsedArgs = {
@@ -274,7 +275,7 @@ function requireSkillTool(id: string): SkillToolDefinition {
 }
 
 /**
- * `luming skill add`: install the canonical `skill/SKILL.md` bundle into the
+ * `lum skill add`: install the canonical `skill/SKILL.md` bundle into the
  * project (default) or user scope; see README「集成路线 - Skill 集成」.
  */
 function runSkillAdd(args: ParsedArgs): void {

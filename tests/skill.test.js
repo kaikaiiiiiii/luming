@@ -196,6 +196,6 @@ test("skill add rejects unknown tools and prints the supported ids", () => {
 test("skill add --help documents the command", () => {
     const result = run(["skill", "add", "--help"]);
     assert.equal(result.status, 0);
-    assert.ok(result.stdout.includes("luming skill add"));
+    assert.ok(result.stdout.includes("lum skill add"));
     assert.ok(result.stdout.includes("dsh, claude, opencode, agents"));
 });

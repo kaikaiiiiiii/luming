@@ -8,8 +8,11 @@ description: Write, review, and debug Luming (.luming) page-structure files and 
 Luming is a small text DSL that describes **static page structure** — boxes, containment,
 layout order, and light styling. One `.luming` file is exactly one page. It compiles to:
 
-- a single self-contained HTML preview: `luming preview page.luming -o page.html`;
-- one component file per entity: `luming generate page.luming --framework vue|react|html`.
+- a single self-contained HTML preview: `lum preview page.luming -o page.html`;
+- one component file per entity: `lum generate page.luming --framework vue|react|html`.
+
+The CLI command is `lum` (npm package `luming-say`), so `npx luming-say <command>` is
+equivalent when nothing is installed.
 
 There are no variables, loops, data binding, events, selectors, or runtime. If a task needs
 those, express only the structure in Luming and handle behavior in the surrounding code.
@@ -90,20 +93,22 @@ those, express only the structure in Luming and handle behavior in the surroundi
    containment, and `()` only for layout grouping.
 2. Put container interiors on their own lines; reference copies bare.
 3. Add styles last, using shorthands before raw CSS.
-4. Preview and inspect: `luming preview page.luming -o page.html`, then open the HTML.
+4. Preview and inspect: `lum preview page.luming -o page.html`, then open the HTML.
    Diagnostics print to stderr; any `error`-level diagnostic makes the exit code `1`
    (outputs are still written so you can inspect them).
 5. Generate components when needed and move them into the project:
-   `luming generate page.luming -o components --framework vue`. Names matching HTML tags
+   `lum generate page.luming -o components --framework vue`. Names matching HTML tags
    get a `My` prefix; `luming.config.json` (`componentRename`, `reservedPrefix`) tunes this.
 6. Never hand-edit generated preview HTML — edit the `.luming` source and regenerate.
 
 ## CLI quick reference
 
 ```bash
-luming preview <input.luming> [-o output.html]
-luming generate <input.luming> [-o outdir] [--framework html|vue|react] [--config path]
+lum preview <input.luming> [-o output.html]
+lum generate <input.luming> [-o outdir] [--framework html|vue|react] [--config path]
 ```
+
+Without a global install: `npx luming-say preview ...`.
 
 Exit codes: `0` success or warnings only; `1` an error-level diagnostic or a runtime error.
 Unknown style tokens are warnings (token dropped); unparseable structure lines are errors

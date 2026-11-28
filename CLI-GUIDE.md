@@ -5,6 +5,9 @@
 > 本文件是 CLI 速览；**权威用法、语法与退出码约定以 `README.zh-CN.md`（§使用）为准**，
 > 出口诊断明细见 `docs/parse-rule.md` §6。
 
+> npm 包名是 **`luming-say`**，安装后的命令名是 **`lum`**（`bin` 只有这一个入口，
+> 所以 `npx luming-say ...` 等价于执行 `lum ...`）。
+
 ---
 
 ## 快速开始
@@ -16,13 +19,24 @@ npm install
 npm run build
 ```
 
-### 全局安装（可选）
+### 全局安装
+
+```bash
+npm install -g luming-say
+lum preview examples/quickstart.luming -o preview.html
+```
+
+### 不安装直接运行（npx）
+
+```bash
+npx luming-say preview examples/quickstart.luming -o preview.html
+```
+
+### 从本仓库本地安装（开发）
 
 ```bash
 npm link
 ```
-
-安装后可全局使用 `luming` 命令。
 
 ---
 
@@ -36,7 +50,7 @@ npm link
 node dist/cli.js preview <input.luming> [-o output.html]
 
 # 或安装后
-luming preview examples/quickstart.luming -o preview.html
+lum preview examples/quickstart.luming -o preview.html
 ```
 
 **默认输出：** `luming.preview.html`
@@ -49,7 +63,7 @@ luming preview examples/quickstart.luming -o preview.html
 node dist/cli.js generate <input.luming> [-o outdir] [--framework html|vue|react]
 
 # 示例
-luming generate examples/quickstart.luming -o components --framework vue
+lum generate examples/quickstart.luming -o components --framework vue
 ```
 
 **默认参数：**
@@ -73,7 +87,7 @@ luming generate examples/quickstart.luming -o components --framework vue
 把权威 skill（`skill/SKILL.md`）安装到 AI 编码代理的约定位置：
 
 ```bash
-node dist/cli.js skill add [--tool dsh|claude|opencode|agents] [--scope project|user] [--dir <skills-root>] [--force]
+lum skill add [--tool dsh|claude|opencode|agents] [--scope project|user] [--dir <skills-root>] [--force]
 ```
 
 **默认参数：** `--scope project`；`--tool` 省略时自动探测工程内已存在的工具目录
@@ -103,7 +117,7 @@ node dist/cli.js skill add [--tool dsh|claude|opencode|agents] [--scope project|
 ✅ 多行组合式定义  
 ✅ 预览模式带视觉层级与诊断信息  
 ✅ 生成模式输出 Vue/React/HTML 独立组件  
-✅ `luming skill add` 安装 luming skill（工程级/用户级、工具自动探测）
+✅ `lum skill add` 安装 luming skill（工程级/用户级、工具自动探测）
 
 ---
 
@@ -111,14 +125,14 @@ node dist/cli.js skill add [--tool dsh|claude|opencode|agents] [--scope project|
 
 ```bash
 # QuickStart 示例（来自 README）
-luming preview examples/quickstart.luming
+lum preview examples/quickstart.luming
 
 # 循环引用截断测试
-luming preview examples/circular.luming
+lum preview examples/circular.luming
 
 # 多框架生成
-luming generate examples/quickstart.luming -o vue-out --framework vue
-luming generate examples/quickstart.luming -o react-out --framework react
+lum generate examples/quickstart.luming -o vue-out --framework vue
+lum generate examples/quickstart.luming -o react-out --framework react
 ```
 
 查看 `examples/` 目录下的 `.luming` 源码与生成结果。
@@ -138,7 +152,9 @@ luming/
 │   ├── style.ts              # 样式 token 解析
 │   ├── renderer.ts           # HTML 预览渲染
 │   ├── generator.ts          # 多框架组件生成器
+│   ├── skill.ts              # skill 安装（工具目录探测）
 │   └── index.ts              # 模块导出
+├── skill/SKILL.md            # luming skill 权威副本
 ├── examples/                 # 测试用例与输出样例
 ├── dist/                     # 编译后产物
 └── package.json
@@ -159,7 +175,3 @@ luming/
 | 隐式水平排列     | `List[Item Item Item]` | 空格即为 `+`（仅 `[]` 内）  |
 | 模板后续覆盖     | 多行同名实体定义       | 后定义属性覆盖前定义        |
 | 循环引用安全截断 | `A[B]` + `B[A]`        | 自动停止递归并标记 Terminus |
-
----
-
-交付完成，请您验收！🎉

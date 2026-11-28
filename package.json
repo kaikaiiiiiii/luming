@@ -1,12 +1,32 @@
 {
-    "name": "luming",
+    "name": "luming-say",
     "version": "0.1.0",
-    "description": "Textual DSL parser and compiler for static page structure descriptions.",
+    "description": "Luming (路明) — a declarative layout DSL for static page structure, with single-file HTML preview and HTML/Vue/React component generation.",
     "license": "MIT",
+    "author": "kaikaiiiiiii",
+    "homepage": "https://kaikaiiiiiii.github.io/luming/",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/kaikaiiiiiii/luming.git"
+    },
+    "bugs": {
+        "url": "https://github.com/kaikaiiiiiii/luming/issues"
+    },
+    "keywords": [
+        "luming",
+        "dsl",
+        "layout",
+        "page-structure",
+        "ui",
+        "html",
+        "vue",
+        "react",
+        "cli"
+    ],
     "main": "dist/index.js",
     "types": "index.d.ts",
     "bin": {
-        "luming": "dist/cli.js"
+        "lum": "dist/cli.js"
     },
     "files": [
         "dist",
@@ -16,6 +36,12 @@
         "README.md",
         "README.zh-CN.md"
     ],
+    "engines": {
+        "node": ">=18"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
     "scripts": {
         "build": "tsc -p tsconfig.json",
         "clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
@@ -24,6 +50,8 @@
         "generate": "node dist/cli.js generate",
         "playground": "node scripts/build-playground.js",
         "deploy": "node scripts/deploy-gh-pages.js",
+        "prepare": "npm run build",
+        "prepublishOnly": "npm test",
         "pretest": "npm run build",
         "test": "node --test tests/ && node tests/semantics-matrix.js"
     },

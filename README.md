@@ -144,7 +144,7 @@ import Content from './Content.vue';
 ```
 Or let your AI editor (agent) understand **Luming** directly: this project maintains
 a **luming skill** (a domain-knowledge file written for AI coding agents) and ships a
-CLI command `luming skill add` to install it into any project, so agents can correctly
+CLI command `lum skill add` to install it into any project, so agents can correctly
 write, edit, and debug `.luming` files — see [Integration Roadmap](#integration-roadmap) below.
 
 In the quick example, we defined a page structure containing Header, Sidebar, Main, and Footer. Inside Main, there are Tabs and Content, and Content further contains Form and Preview. With concise syntax, we can clearly express the page's hierarchical relationships and layout.
@@ -396,6 +396,14 @@ Add conditional display syntax.
 
 <span style='color: #ffb464; font-weight: bold;'>**Luming**</span> provides a command-line tool to compile its textual descriptions into visual previews or structured front-end code components. To cater to different scenarios, **Luming** offers two invocation methods: Preview Mode and Generate Mode.
 
+The CLI is published on npm as **`luming-say`** and installs the command **`lum`**:
+
+```bash
+npx luming-say preview page.luming        # run without installing
+npm install -g luming-say                 # global install
+lum preview page.luming -o page.html      # afterwards
+```
+
 ## Preview Mode
 
 In preview mode, **Luming** will generate a single HTML document as much as possible, embedding all HTML, CSS, and JavaScript content within one file, so it can be directly rendered by browsers or other tools. In this mode, **Luming** automatically adds some basic styles to each entity to ensure they are visually discernible and clearly demonstrate the hierarchical relationships between them. These basic styles include:
@@ -447,8 +455,10 @@ Update it whenever the syntax or semantics change (see [AGENTS.md](AGENTS.md)).
 Install command:
 
 ```bash
-luming skill add [--tool <id>] [--scope project|user] [--dir <skills-root>] [--force]
+lum skill add [--tool <id>] [--scope project|user] [--dir <skills-root>] [--force]
 ```
+
+(The npm package is `luming-say`; with npx, run `npx luming-say skill add ...`.)
 
 * `--scope project` (default): installs into the **current project**, committed with the
   repository and shared with the team — the highest-precedence scope;
